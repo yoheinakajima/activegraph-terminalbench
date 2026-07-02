@@ -1,0 +1,21 @@
+# run outputs
+runs/
+jobs/
+
+# secrets
+.env
+
+# python
+__pycache__/
+*.pyc
+.venv/
+*.egg-info/
+dist/
+
+# activegraph event stores
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+
+# pytest
+.pytest_cache/
