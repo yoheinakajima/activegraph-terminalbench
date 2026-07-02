@@ -79,7 +79,9 @@ class LLMClient:
                 "ANTHROPIC_API_KEY is not set. Export it before running: "
                 "export ANTHROPIC_API_KEY=sk-ant-..."
             )
-        self._client = anthropic.AsyncAnthropic(api_key=api_key)
+        # The SDK's built-in retries are disabled so every retry goes through
+        # this wrapper and gets logged as an llm_retry event.
+        self._client = anthropic.AsyncAnthropic(api_key=api_key, max_retries=0)
 
     async def complete(
         self, messages: list[dict[str, str]], *, log_event: LogEventFn
@@ -95,12 +97,14 @@ class LLMClient:
                     system=system,
                     messages=turns,
                 )
-            except (
-                anthropic.RateLimitError,
-                anthropic.InternalServerError,
-                anthropic.APIConnectionError,
-                anthropic.APITimeoutError,
-            ) as exc:
+            except (anthropic.APIStatusError, anthropic.APIConnectionError) as exc:
+                # Retry 429, all 5xx (including 529 overloaded), and
+                # connection/timeout errors. Anything else (401, 400, ...) is
+                # a caller problem: fail immediately and loudly.
+                status = getattr(exc, "status_code", None)
+                retryable = status is None or status == 429 or status >= 500
+                if not retryable:
+                    raise
                 last_error = exc
                 delay = RETRY_BASE_DELAY_SEC * (2**attempt)
                 log_event(
