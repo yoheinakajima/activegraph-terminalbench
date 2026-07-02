@@ -24,7 +24,11 @@ from activegraph_harness.llm import LLMResult
 
 DEFAULT_MAX_STEPS = 60
 DEFAULT_COMMAND_TIMEOUT_SEC = 180
-DEFAULT_WALL_CLOCK_BUDGET_SEC = 3000.0
+# Harbor does not tell the agent the task's timeout, so the soft budget
+# defaults to the modal TB2 agent timeout (900s) minus 60s of headroom for
+# export and shutdown. Raise it per run with --ak wall_clock_budget_sec=...
+# for the long tasks (TB2 has tasks up to 12000s).
+DEFAULT_WALL_CLOCK_BUDGET_SEC = 840.0
 DEFAULT_MAX_FEEDBACK_CHARS = 4000
 
 TRUNCATION_MARKER = "\n[... output truncated: {omitted} of {total} chars omitted ...]\n"
