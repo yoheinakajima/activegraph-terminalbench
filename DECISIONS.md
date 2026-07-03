@@ -134,26 +134,55 @@ Verified in this sandbox, end to end:
   export paths (`tests/test_loop.py`, against real activegraph, no mocks
   of the store).
 
-NOT verified here, and why:
+Verified in a second sandbox session (2026-07-03), with a real API key
+(`ANTHROP_API_KEY`):
 
-- **No real Anthropic API call was made.** This sandbox has no
-  `ANTHROPIC_API_KEY`. The haiku smoke test and the sonnet full run in the
-  README are written exactly as they should be typed on your Mac, but they
-  were not executed. The first thing to do after cloning is run smoke test
-  2 and read one `event_log.json` end to end.
+- **Real Anthropic API calls are now verified.** Smoke test 2 ran against
+  `claude-haiku-4-5` (2 tasks, then again with `-k 2`): per-turn
+  `input_tokens` / `output_tokens` / `latency_sec` in `event_log.json` are
+  real API usage numbers, `llm_retry` never fired (no 429s at
+  4-concurrent), and `events.sqlite`, `event_log.json`, `summary.json`,
+  `trajectory.json` were produced for every trial. `wolfbench_metrics.py`
+  output was re-checked cell for cell against Harbor's result.json rewards,
+  now including a live "sometimes" row (largest-eigenval flipped 1→0 on a
+  wall-clock speedup assertion).
+- **The full 89-task benchmark ran in this sandbox** with
+  `anthropic/claude-sonnet-4-6`, k=1, `--n-concurrent 4`, in 4 chunks with
+  `docker image prune` between them, plus one-at-a-time retries of 5 trials
+  whose Docker environments never started (image-extract races with a
+  concurrent prune, then ENOSPC on ~15GB torch/mteb images — sandbox disk,
+  not the harness; 2 of the 5 passed on retry). Canonical result: 34/89 =
+  38.2% pass (env errors counted as failures), 36/89 = 40.4% with the two
+  recovered env-failures. ~$106 of sonnet spend (28.5M in / 1.4M out
+  tokens), ~4.5h wall time. Per-task breakdown separating agent failures
+  from sandbox-infrastructure failures: `results/README.md`.
+- **The astral.sh blockage was worked around, and validated.** A local
+  HTTPS stand-in for astral.sh serves an install.sh backed by the uv 0.9.5
+  binaries repacked from the official PyPI wheels (gnu + musl), with a
+  self-signed CA, `extra_hosts: astral.sh:host-gateway`, and a combined CA
+  bundle in the compose overlay; a fully static curl is mounted at
+  `/usr/local/bin/curl` because apt mirrors are also blocked and most
+  verifiers `apt-get install curl` first (harmless failure — no `set -e` —
+  once curl exists). Validated by the oracle agent on
+  `openssl-selfsigned-cert`: reward 1.0. With this overlay every verifier
+  except huggingface-dependent ones could run.
+
+Still NOT verified, and why:
+
 - **Nothing was executed on macOS or Apple Silicon.** All Docker
   verification here is linux/amd64. The Rosetta guidance in the README is
   standard TB2 practice but was not exercised in this build.
-- **The full 89-task oracle run was not executed here** (sandbox network
-  policy blocks several verifier downloads, notably the uv installer from
-  astral.sh that most TB2 verifiers fetch; that restriction does not exist
-  on a normal network).
-- Sandbox-only adaptations that were used here and are NOT part of the
-  repo: a local `registry.json` with `--registry-path` (the hub registry
-  API was proxy-blocked; the README documents this as a troubleshooting
-  fallback), a Docker registry mirror, and an `--extra-docker-compose`
-  overlay mounting the proxy's CA bundle into task containers. None are
-  needed on a machine with normal egress.
+- **k>1 at full scale.** The full run is k=1 (a k=5 run would outlive this
+  container), so solid/ceiling/spread coincide at 89 tasks; the variance
+  machinery was demonstrated live only on the k=2 haiku smoke.
+- **Tasks needing huggingface.co or Debian apt mirrors** never got a fair
+  attempt (egress allowlist). They are counted as failures in the canonical
+  number and itemized in `results/README.md`.
+- Sandbox-only adaptations used here, NOT part of the repo and not needed
+  on a machine with normal egress: local `registry.json` with
+  `--registry-path`, a Docker registry mirror (`mirror.gcr.io`), and the
+  `--extra-docker-compose` overlay described above (proxy CA bundle +
+  astral.sh stand-in + static curl).
 
 ## Known fragilities
 
