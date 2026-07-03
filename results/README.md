@@ -7,9 +7,9 @@ Full-benchmark attempt run on 2026-07-03 inside a Claude Code cloud sandbox.
 - **Dataset**: `terminal-bench@2.0` (all 89 tasks), run in 4 chunks
   (`runs/wolfbench-sonnet-k1-c1..c4`) plus sequential retries of trials whose
   Docker environment never started (`runs/wolfbench-sonnet-k1-retry*`).
-- **API spend**: $105.96 sonnet (87 trials, 28.5M in / 1.36M out tokens) +
-  $2.36 haiku smoke tests = **~$108 total** (estimated from public per-token
-  pricing; the API does not return cost).
+- **API spend**: $109.17 sonnet (89 agent trials incl. retries, 29.5M in /
+  1.39M out tokens) + $2.36 haiku smoke tests = **~$112 total** (estimated
+  from public per-token pricing; the API does not return cost).
 
 ## Headline numbers (metrics.json / matrix.csv)
 
@@ -21,10 +21,13 @@ verifier produced a reward count as failures:
 | pass rate (all five WolfBench numbers coincide at k=1) | **34/89 = 38.2%** |
 
 With the five environment-startup failures retried (see below), the
-infra-recovered pass rate is **36/89 = 40.4%** — and 40/89 = 44.9% if you
-additionally exclude only-provably-sandbox-blocked tasks from the denominator.
-`metrics.json` and `matrix.csv` keep the canonical 38.2% view; the retry
-outcomes live in `runs/wolfbench-sonnet-k1-retry*` and are summarized here.
+infra-recovered pass rate is **36/89 = 40.4%**. Excluding the 7 tasks that
+provably cannot be attempted in this sandbox (huggingface.co or Debian
+source/toolchain packages required: hf-model-inference, mteb-retrieve,
+mteb-leaderboard, count-dataset-tokens, reshard-c4-data, build-pmars,
+make-doom-for-mips) gives 36/82 = 43.9%. `metrics.json` and `matrix.csv`
+keep the canonical 38.2% view; the retry outcomes live in
+`runs/wolfbench-sonnet-k1-retry*` and are summarized here.
 
 ## Passing tasks (34)
 
@@ -62,7 +65,7 @@ real attempt:
 | pytorch-model-recovery | **1.0 (pass)** |
 | hf-model-inference | 0.0 — huggingface.co blocked (3/4 verifier tests pass; only `test_model_downloaded` fails) |
 | mteb-retrieve | 0.0 — huggingface.co blocked (17 denied requests in agent transcript) |
-| mteb-leaderboard | RETRY4_PLACEHOLDER |
+| mteb-leaderboard | 0.0 — huggingface.co blocked (4 denied requests in agent transcript) |
 
 ### Blocked-egress failures during the agent's work
 

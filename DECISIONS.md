@@ -153,8 +153,8 @@ Verified in a second sandbox session (2026-07-03), with a real API key
   concurrent prune, then ENOSPC on ~15GB torch/mteb images — sandbox disk,
   not the harness; 2 of the 5 passed on retry). Canonical result: 34/89 =
   38.2% pass (env errors counted as failures), 36/89 = 40.4% with the two
-  recovered env-failures. ~$106 of sonnet spend (28.5M in / 1.4M out
-  tokens), ~4.5h wall time. Per-task breakdown separating agent failures
+  recovered env-failures. ~$109 of sonnet spend (29.5M in / 1.4M out
+  tokens), ~5h wall time. Per-task breakdown separating agent failures
   from sandbox-infrastructure failures: `results/README.md`.
 - **The astral.sh blockage was worked around, and validated.** A local
   HTTPS stand-in for astral.sh serves an install.sh backed by the uv 0.9.5
