@@ -73,10 +73,16 @@ class LLMClient:
     def __init__(self, model_name: str | None = None, *, max_output_tokens: int = 4096):
         self.model = resolve_model(model_name)
         self.max_output_tokens = max_output_tokens
-        api_key = os.environ.get("ANTHROPIC_API_KEY")
+        # Claude Code on the web reserves the ANTHROPIC_API_KEY name in its
+        # environment settings (provider auth is host-managed there), so
+        # accept ANTHROP_API_KEY as a fallback for sandbox runs.
+        api_key = os.environ.get("ANTHROPIC_API_KEY") or os.environ.get(
+            "ANTHROP_API_KEY"
+        )
         if not api_key:
             raise LLMError(
-                "ANTHROPIC_API_KEY is not set. Export it before running: "
+                "ANTHROPIC_API_KEY is not set (nor the ANTHROP_API_KEY "
+                "fallback). Export it before running: "
                 "export ANTHROPIC_API_KEY=sk-ant-..."
             )
         # The SDK's built-in retries are disabled so every retry goes through

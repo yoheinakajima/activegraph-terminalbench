@@ -85,8 +85,16 @@ def test_retry_on_overloaded_and_token_accounting(monkeypatch):
 
 def test_missing_api_key_fails_loudly(monkeypatch):
     monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    monkeypatch.delenv("ANTHROP_API_KEY", raising=False)
     with pytest.raises(llm_mod.LLMError, match="ANTHROPIC_API_KEY"):
         llm_mod.LLMClient("claude-test-model")
+
+
+def test_fallback_key_name_is_accepted(monkeypatch):
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    monkeypatch.setenv("ANTHROP_API_KEY", "test-key")
+    client = llm_mod.LLMClient("claude-test-model")
+    assert client.model == "claude-test-model"
 
 
 def test_resolve_model_rejects_foreign_provider():
