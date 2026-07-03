@@ -240,3 +240,22 @@ Still NOT verified, and why:
    a context_builder callable passed into run_loop. The loop signature
    grew one defaulted parameter; the loop body still calls whatever
    builder it was handed.
+7. **Run-matrix infrastructure incidents, all documented as they
+   happened:** (a) the first Run A launch used pass-1-sized 24-task
+   chunks; harbor schedules k=3 breadth-first, so all 24 task images plus
+   ~11 GB of concurrent container writable layers must coexist, which
+   cannot fit this disk. Killed at $21.90 of spend (36 agent-side trials,
+   discarded for matrix cleanliness), rerun as 8-task chunks with the four
+   giant-image tasks as singletons (scripts/run_config.sh, chunk files
+   committed under results/pass2/chunks/). (b) One trial
+   (custom-memory-heap-crash, Run A s03) hung forever in harbor's
+   artifact-collection step after the agent finished: harbor idle at 0%
+   CPU, verifier never started, no timeout applies there. Killed and
+   replaced by a k=1 make-up trial of the same task (which passed); the
+   swap is recorded inside results/pass2/pass2-A-s03.json. (c) terminus-2
+   (Run B) installs tmux via apt or a source build, both egress-blocked,
+   so every trial died at setup. Fixed by mounting a static tmux 3.3a
+   (fetched from GitHub releases, reachable from containers) into B's
+   containers only (tls-overlay-astral-tmux.yaml); with tmux present its
+   installer no-ops. Verified with a one-task probe: reward 1.0, 82%
+   cache hit rate.
