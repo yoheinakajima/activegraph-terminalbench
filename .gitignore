@@ -19,3 +19,6 @@ dist/
 
 # pytest
 .pytest_cache/
+
+# local sandbox cache (registry.json, overlays)
+.cache/
