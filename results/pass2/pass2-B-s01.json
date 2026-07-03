@@ -1,0 +1,249 @@
+{
+  "label": "B",
+  "job_dirs": [
+    "runs/pass2-B-s01"
+  ],
+  "n_trials": 24,
+  "trials": [
+    {
+      "task": "adaptive-rejection-sampler",
+      "trial": "adaptive-rejection-sampler__6Ni3MSL",
+      "started_at": "2026-07-03T17:20:32.032185Z",
+      "reward": 1.0,
+      "exception": null,
+      "n_input_tokens": 723446,
+      "n_cache_tokens": 677076,
+      "n_output_tokens": 29740
+    },
+    {
+      "task": "adaptive-rejection-sampler",
+      "trial": "adaptive-rejection-sampler__Gn9sfmP",
+      "started_at": "2026-07-03T18:07:43.254598Z",
+      "reward": 0.0,
+      "exception": null,
+      "n_input_tokens": 1399845,
+      "n_cache_tokens": 1327044,
+      "n_output_tokens": 51326
+    },
+    {
+      "task": "adaptive-rejection-sampler",
+      "trial": "adaptive-rejection-sampler__dhnyBPG",
+      "started_at": "2026-07-03T17:32:41.515657Z",
+      "reward": 0.0,
+      "exception": null,
+      "n_input_tokens": 791582,
+      "n_cache_tokens": 743397,
+      "n_output_tokens": 28002
+    },
+    {
+      "task": "bn-fit-modify",
+      "trial": "bn-fit-modify__ENjmsHy",
+      "started_at": "2026-07-03T17:41:13.131931Z",
+      "reward": 1.0,
+      "exception": null,
+      "n_input_tokens": 636131,
+      "n_cache_tokens": 590923,
+      "n_output_tokens": 20424
+    },
+    {
+      "task": "bn-fit-modify",
+      "trial": "bn-fit-modify__SC7G2dt",
+      "started_at": "2026-07-03T18:17:11.150362Z",
+      "reward": 0.0,
+      "exception": null,
+      "n_input_tokens": 118963,
+      "n_cache_tokens": 101937,
+      "n_output_tokens": 7915
+    },
+    {
+      "task": "bn-fit-modify",
+      "trial": "bn-fit-modify__WjTvuQy",
+      "started_at": "2026-07-03T17:20:32.062274Z",
+      "reward": 1.0,
+      "exception": null,
+      "n_input_tokens": 478116,
+      "n_cache_tokens": 447562,
+      "n_output_tokens": 11745
+    },
+    {
+      "task": "break-filter-js-from-html",
+      "trial": "break-filter-js-from-html__K5MS9RL",
+      "started_at": "2026-07-03T17:20:32.065356Z",
+      "reward": 1.0,
+      "exception": null,
+      "n_input_tokens": 1079767,
+      "n_cache_tokens": 1045744,
+      "n_output_tokens": 17330
+    },
+    {
+      "task": "break-filter-js-from-html",
+      "trial": "break-filter-js-from-html__K7bkta2",
+      "started_at": "2026-07-03T18:21:09.022138Z",
+      "reward": 1.0,
+      "exception": null,
+      "n_input_tokens": 224244,
+      "n_cache_tokens": 208085,
+      "n_output_tokens": 8104
+    },
+    {
+      "task": "break-filter-js-from-html",
+      "trial": "break-filter-js-from-html__itbCGHK",
+      "started_at": "2026-07-03T17:42:30.340466Z",
+      "reward": 1.0,
+      "exception": null,
+      "n_input_tokens": 772417,
+      "n_cache_tokens": 744970,
+      "n_output_tokens": 15433
+    },
+    {
+      "task": "build-cython-ext",
+      "trial": "build-cython-ext__FBtE4uF",
+      "started_at": "2026-07-03T18:25:17.011931Z",
+      "reward": 0.0,
+      "exception": null,
+      "n_input_tokens": 1002361,
+      "n_cache_tokens": 959906,
+      "n_output_tokens": 12280
+    },
+    {
+      "task": "build-cython-ext",
+      "trial": "build-cython-ext__oX54YHo",
+      "started_at": "2026-07-03T17:20:32.070526Z",
+      "reward": 0.0,
+      "exception": null,
+      "n_input_tokens": 660928,
+      "n_cache_tokens": 628716,
+      "n_output_tokens": 7563
+    },
+    {
+      "task": "build-cython-ext",
+      "trial": "build-cython-ext__vmjCYzi",
+      "started_at": "2026-07-03T17:51:08.619302Z",
+      "reward": 0.0,
+      "exception": null,
+      "n_input_tokens": 586248,
+      "n_cache_tokens": 555914,
+      "n_output_tokens": 8640
+    },
+    {
+      "task": "build-pmars",
+      "trial": "build-pmars__FgBFFHY",
+      "started_at": "2026-07-03T17:27:04.997474Z",
+      "reward": 0.0,
+      "exception": "AgentTimeoutError",
+      "n_input_tokens": 4377226,
+      "n_cache_tokens": 4318205,
+      "n_output_tokens": 25874
+    },
+    {
+      "task": "build-pmars",
+      "trial": "build-pmars__frt5dNk",
+      "started_at": "2026-07-03T18:25:35.790571Z",
+      "reward": 0.0,
+      "exception": "AgentTimeoutError",
+      "n_input_tokens": 2721621,
+      "n_cache_tokens": 2657783,
+      "n_output_tokens": 24209
+    },
+    {
+      "task": "build-pmars",
+      "trial": "build-pmars__hFuehmz",
+      "started_at": "2026-07-03T17:51:09.549365Z",
+      "reward": 0.0,
+      "exception": "AgentTimeoutError",
+      "n_input_tokens": 2805951,
+      "n_cache_tokens": 2738107,
+      "n_output_tokens": 24509
+    },
+    {
+      "task": "build-pov-ray",
+      "trial": "build-pov-ray__AEcae3w",
+      "started_at": "2026-07-03T17:27:46.286700Z",
+      "reward": 0.0,
+      "exception": "AgentTimeoutError",
+      "n_input_tokens": 235724004,
+      "n_cache_tokens": 235523196,
+      "n_output_tokens": 124121
+    },
+    {
+      "task": "build-pov-ray",
+      "trial": "build-pov-ray__k37jmAb",
+      "started_at": "2026-07-03T17:52:07.612004Z",
+      "reward": 0.0,
+      "exception": "AgentTimeoutError",
+      "n_input_tokens": 299739231,
+      "n_cache_tokens": 299538370,
+      "n_output_tokens": 110099
+    },
+    {
+      "task": "build-pov-ray",
+      "trial": "build-pov-ray__vpqvdLH",
+      "started_at": "2026-07-03T18:32:35.604240Z",
+      "reward": 0.0,
+      "exception": null,
+      "n_input_tokens": 8415013,
+      "n_cache_tokens": 8326297,
+      "n_output_tokens": 41958
+    },
+    {
+      "task": "caffe-cifar-10",
+      "trial": "caffe-cifar-10__REBiHxf",
+      "started_at": "2026-07-03T18:40:54.468504Z",
+      "reward": 0.0,
+      "exception": "AgentTimeoutError",
+      "n_input_tokens": 690467,
+      "n_cache_tokens": 655817,
+      "n_output_tokens": 7695
+    },
+    {
+      "task": "caffe-cifar-10",
+      "trial": "caffe-cifar-10__nWdF5HW",
+      "started_at": "2026-07-03T17:30:28.360022Z",
+      "reward": 0.0,
+      "exception": "AgentTimeoutError",
+      "n_input_tokens": 760066,
+      "n_cache_tokens": 724790,
+      "n_output_tokens": 6943
+    },
+    {
+      "task": "caffe-cifar-10",
+      "trial": "caffe-cifar-10__tz4mept",
+      "started_at": "2026-07-03T17:56:40.580085Z",
+      "reward": 0.0,
+      "exception": "AgentTimeoutError",
+      "n_input_tokens": 714565,
+      "n_cache_tokens": 685102,
+      "n_output_tokens": 7195
+    },
+    {
+      "task": "cancel-async-tasks",
+      "trial": "cancel-async-tasks__7srGtPg",
+      "started_at": "2026-07-03T19:01:24.748230Z",
+      "reward": 0.0,
+      "exception": null,
+      "n_input_tokens": 55403,
+      "n_cache_tokens": 43419,
+      "n_output_tokens": 5457
+    },
+    {
+      "task": "cancel-async-tasks",
+      "trial": "cancel-async-tasks__VsD9PU6",
+      "started_at": "2026-07-03T17:30:39.542401Z",
+      "reward": 0.0,
+      "exception": null,
+      "n_input_tokens": 34356,
+      "n_cache_tokens": 23119,
+      "n_output_tokens": 5117
+    },
+    {
+      "task": "cancel-async-tasks",
+      "trial": "cancel-async-tasks__vnieETg",
+      "started_at": "2026-07-03T18:06:28.341249Z",
+      "reward": 0.0,
+      "exception": null,
+      "n_input_tokens": 12068,
+      "n_cache_tokens": 6562,
+      "n_output_tokens": 2060
+    }
+  ]
+}
