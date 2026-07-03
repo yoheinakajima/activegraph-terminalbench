@@ -39,10 +39,22 @@ class LLMResult:
     text: str
     input_tokens: int
     output_tokens: int
+    cache_creation_input_tokens: int
+    cache_read_input_tokens: int
     latency_sec: float
     model: str
     retries: int
     stop_reason: str | None
+
+    @property
+    def total_input_tokens(self) -> int:
+        """All prompt tokens the model actually saw. The API reports
+        input_tokens as only the tokens after the last cache breakpoint."""
+        return (
+            self.input_tokens
+            + self.cache_creation_input_tokens
+            + self.cache_read_input_tokens
+        )
 
 
 def resolve_model(model_name: str | None) -> str:
@@ -62,17 +74,82 @@ def resolve_model(model_name: str | None) -> str:
     return model
 
 
-def split_system(messages: list[dict[str, str]]) -> tuple[str, list[dict[str, str]]]:
+def split_system(messages: list[dict[str, Any]]) -> tuple[Any, list[dict[str, Any]]]:
     """Separate the leading system message from the chat turns."""
     if messages and messages[0]["role"] == "system":
         return messages[0]["content"], messages[1:]
     return "", messages
 
 
+def apply_cache_control(system: Any, turns: list[dict[str, Any]]) -> tuple[Any, list[dict[str, Any]]]:
+    """Place prompt-cache breakpoints on the request.
+
+    Breakpoint budget (API maximum is 4 per request; this uses 2):
+    1. The system prompt, which is identical every turn of a trial.
+    2. The last STABLE text block of the final message, so each turn reads
+       the whole prior transcript from cache and writes only the new tail.
+
+    build_context() marks per-turn volatile text (the budget countdown, the
+    v2 retrieved slice) by putting it in blocks AFTER the last stable block
+    of the final message; those blocks stay behind the breakpoint and are
+    never cached. Messages whose content is a plain string are treated as
+    one stable block. Earlier messages are never marked: the server matches
+    the request prefix against the cache entry written at the previous
+    turn's breakpoint, so one moving breakpoint is enough.
+
+    Content blocks below the model's minimum cacheable prefix (1024 tokens
+    on Sonnet, 4096 on Haiku 4.5) are silently not cached by the API; both
+    usage counters just read 0. That is expected on small early turns.
+    """
+    system_blocks = [
+        {"type": "text", "text": system, "cache_control": {"type": "ephemeral"}}
+    ]
+    cached_turns = []
+    for turn in turns:
+        turn = dict(turn)
+        if not isinstance(turn["content"], str):
+            # Strip the harness-internal volatile flag; the API rejects
+            # unknown block fields.
+            turn["content"] = [
+                {k: v for k, v in block.items() if k != "volatile"}
+                for block in turn["content"]
+            ]
+        cached_turns.append(turn)
+    if not cached_turns:
+        return system_blocks, cached_turns
+
+    final = cached_turns[-1]
+    original_content = turns[-1]["content"]
+    if isinstance(original_content, str):
+        blocks = [{"type": "text", "text": original_content}]
+        stable_indices = [0]
+    else:
+        blocks = final["content"]
+        stable_indices = [
+            i
+            for i, block in enumerate(original_content)
+            if not block.get("volatile", False)
+        ]
+    if stable_indices:
+        blocks[stable_indices[-1]] = {
+            **blocks[stable_indices[-1]],
+            "cache_control": {"type": "ephemeral"},
+        }
+    final["content"] = blocks
+    return system_blocks, cached_turns
+
+
 class LLMClient:
-    def __init__(self, model_name: str | None = None, *, max_output_tokens: int = 4096):
+    def __init__(
+        self,
+        model_name: str | None = None,
+        *,
+        max_output_tokens: int = 4096,
+        enable_prompt_caching: bool = True,
+    ):
         self.model = resolve_model(model_name)
         self.max_output_tokens = max_output_tokens
+        self.enable_prompt_caching = enable_prompt_caching
         # Claude Code on the web reserves the ANTHROPIC_API_KEY name in its
         # environment settings (provider auth is host-managed there), so
         # accept ANTHROP_API_KEY as a fallback for sandbox runs.
@@ -93,6 +170,8 @@ class LLMClient:
         self, messages: list[dict[str, str]], *, log_event: LogEventFn
     ) -> LLMResult:
         system, turns = split_system(messages)
+        if self.enable_prompt_caching:
+            system, turns = apply_cache_control(system, turns)
         last_error: Exception | None = None
         for attempt in range(MAX_RETRIES + 1):
             started = time.monotonic()
@@ -135,6 +214,10 @@ class LLMClient:
                 text=text,
                 input_tokens=response.usage.input_tokens,
                 output_tokens=response.usage.output_tokens,
+                # None when the request had no cache_control breakpoints.
+                cache_creation_input_tokens=response.usage.cache_creation_input_tokens
+                or 0,
+                cache_read_input_tokens=response.usage.cache_read_input_tokens or 0,
                 latency_sec=round(latency, 3),
                 model=response.model,
                 retries=attempt,

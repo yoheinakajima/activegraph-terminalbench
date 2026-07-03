@@ -55,6 +55,19 @@ STORE_FILENAME = "events.sqlite"
 TRAJECTORY_FILENAME = "trajectory.json"
 
 
+def _parse_bool(value: object) -> bool:
+    """Harbor passes --ak values as strings; accept real bools too."""
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, str):
+        lowered = value.strip().lower()
+        if lowered in ("true", "1", "yes"):
+            return True
+        if lowered in ("false", "0", "no"):
+            return False
+    raise ValueError(f"expected a boolean, got {value!r}")
+
+
 class ActiveGraphAgent(BaseAgent):
     SUPPORTS_ATIF: bool = True
 
@@ -66,6 +79,7 @@ class ActiveGraphAgent(BaseAgent):
         command_timeout_sec: int = DEFAULT_COMMAND_TIMEOUT_SEC,
         wall_clock_budget_sec: float = DEFAULT_WALL_CLOCK_BUDGET_SEC,
         llm_client_import_path: str = "activegraph_harness.llm:LLMClient",
+        enable_prompt_caching: bool = True,
         *args,
         **kwargs,
     ):
@@ -78,12 +92,16 @@ class ActiveGraphAgent(BaseAgent):
             llm_client_import_path: 'module:Class' of the model client. The
                 default is the Anthropic wrapper; tests substitute a
                 scripted client here.
+            enable_prompt_caching: Place cache_control breakpoints on
+                requests (see llm.apply_cache_control). On by default;
+                --ak enable_prompt_caching=false restores pass 1 behavior.
         """
         super().__init__(logs_dir, model_name, *args, **kwargs)
         self._max_steps = int(max_steps)
         self._command_timeout_sec = int(command_timeout_sec)
         self._wall_clock_budget_sec = float(wall_clock_budget_sec)
         self._llm_client_import_path = llm_client_import_path
+        self._enable_prompt_caching = _parse_bool(enable_prompt_caching)
         self._environment_info: dict[str, str] = {}
 
     @staticmethod
@@ -159,7 +177,9 @@ class ActiveGraphAgent(BaseAgent):
 
         try:
             llm_class = import_class(self._llm_client_import_path, label="llm client")
-            llm = llm_class(self.model_name)
+            llm = llm_class(
+                self.model_name, enable_prompt_caching=self._enable_prompt_caching
+            )
             loop_result = await run_loop(
                 environment=environment,
                 instruction=instruction,
@@ -187,8 +207,12 @@ class ActiveGraphAgent(BaseAgent):
                         "steps": recorder.n_turns,
                         "commands": recorder.n_commands,
                         "errors": loop_result.n_errors if loop_result else None,
-                        "tokens_in": recorder.total_input_tokens,
+                        "tokens_in": recorder.total_prompt_tokens(),
+                        "tokens_in_uncached": recorder.total_input_tokens,
                         "tokens_out": recorder.total_output_tokens,
+                        "tokens_cache_creation": recorder.total_cache_creation_tokens,
+                        "tokens_cache_read": recorder.total_cache_read_tokens,
+                        "cache_hit_rate": recorder.cache_hit_rate(),
                         "wall_time_sec": wall_time,
                     },
                 )
@@ -232,6 +256,8 @@ class _TrajectoryRecorder:
         self.n_commands = 0
         self.total_input_tokens = 0
         self.total_output_tokens = 0
+        self.total_cache_creation_tokens = 0
+        self.total_cache_read_tokens = 0
         self._steps: list[Step] = [
             Step(
                 step_id=1,
@@ -245,12 +271,32 @@ class _TrajectoryRecorder:
     def _now() -> str:
         return datetime.now(timezone.utc).isoformat()
 
+    def total_prompt_tokens(self) -> int:
+        """All prompt tokens the model saw. With caching on, the API's
+        input_tokens counts only the uncached suffix after the last cache
+        breakpoint; the full prompt is the sum of all three counters. This
+        keeps tokens_in comparable with the uncached pass 1 numbers."""
+        return (
+            self.total_input_tokens
+            + self.total_cache_creation_tokens
+            + self.total_cache_read_tokens
+        )
+
+    def cache_hit_rate(self) -> float:
+        """Share of all prompt tokens that were served from cache."""
+        total = self.total_prompt_tokens()
+        if total == 0:
+            return 0.0
+        return round(self.total_cache_read_tokens / total, 4)
+
     def record(self, turn: TurnRecord) -> None:
         self.n_turns += 1
         if turn.command is not None:
             self.n_commands += 1
         self.total_input_tokens += turn.input_tokens
         self.total_output_tokens += turn.output_tokens
+        self.total_cache_creation_tokens += turn.cache_creation_input_tokens
+        self.total_cache_read_tokens += turn.cache_read_input_tokens
 
         tool_calls: list[ToolCall] | None = None
         observation_results: list[ObservationResult] = []
@@ -288,8 +334,11 @@ class _TrajectoryRecorder:
                     else None
                 ),
                 metrics=Metrics(
-                    prompt_tokens=turn.input_tokens,
+                    prompt_tokens=turn.input_tokens
+                    + turn.cache_creation_input_tokens
+                    + turn.cache_read_input_tokens,
                     completion_tokens=turn.output_tokens,
+                    cached_tokens=turn.cache_read_input_tokens,
                 ),
                 extra={
                     "parse_failed": turn.parse_failed,
@@ -299,7 +348,8 @@ class _TrajectoryRecorder:
             )
         )
 
-        self._context.n_input_tokens = self.total_input_tokens
+        self._context.n_input_tokens = self.total_prompt_tokens()
+        self._context.n_cache_tokens = self.total_cache_read_tokens
         self._context.n_output_tokens = self.total_output_tokens
         self.dump()
 
@@ -313,8 +363,9 @@ class _TrajectoryRecorder:
             ),
             steps=self._steps,
             final_metrics=FinalMetrics(
-                total_prompt_tokens=self.total_input_tokens,
+                total_prompt_tokens=self.total_prompt_tokens(),
                 total_completion_tokens=self.total_output_tokens,
+                total_cached_tokens=self.total_cache_read_tokens,
             ),
         )
         path = self._logs_dir / TRAJECTORY_FILENAME

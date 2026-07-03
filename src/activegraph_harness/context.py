@@ -16,7 +16,7 @@ changes retrieval without touching the loop.
 from __future__ import annotations
 
 from activegraph_harness.events import TrialLog
-from activegraph_harness.prompts import render_system_prompt
+from activegraph_harness.prompts import render_budget_line, render_system_prompt
 
 # Keep at most this many trailing (assistant, user) exchange pairs verbatim.
 MAX_TAIL_EXCHANGES = 20
@@ -40,7 +40,10 @@ def build_context(log: TrialLog, instruction: str, step_count: int, budgets) -> 
     Returns:
         A message list for llm.LLMClient.complete(). messages[0] is the
         system message; the rest alternate user/assistant and end with
-        a user message.
+        a user message. Message content is a plain string, except the
+        final message: a list of text blocks where blocks flagged
+        "volatile": True change every turn and must stay after the moving
+        cache breakpoint (see llm.apply_cache_control).
 
     v2 (future): replace the verbatim tail with a retrieved subgraph:
     the active error object and its `contains` chain, the files it
@@ -53,8 +56,7 @@ def build_context(log: TrialLog, instruction: str, step_count: int, budgets) -> 
     system = {
         "role": "system",
         "content": render_system_prompt(
-            command_timeout_sec=budgets.command_timeout_sec,
-            budget_status=budgets.status_line(step_count),
+            command_timeout_sec=budgets.command_timeout_sec
         ),
     }
 
@@ -70,6 +72,24 @@ def build_context(log: TrialLog, instruction: str, step_count: int, budgets) -> 
     for assistant_text, user_text in tail:
         messages.append({"role": "assistant", "content": assistant_text})
         messages.append({"role": "user", "content": user_text})
+
+    # The per-turn budget countdown rides in a volatile block AFTER the last
+    # stable block of the final message. llm.apply_cache_control() puts the
+    # moving cache breakpoint on the stable block, so the countdown never
+    # invalidates the cached transcript prefix. Caching tradeoff, v1: a big
+    # input that is mostly cache reads while the tail window is not yet
+    # sliding (the first MAX_TAIL_EXCHANGES exchanges); once trimming starts,
+    # the omission counter in the first user message changes every turn and
+    # the transcript prefix misses by design. That is a v1 structural cost.
+    final = messages[-1]
+    final["content"] = [
+        {"type": "text", "text": final["content"]},
+        {
+            "type": "text",
+            "text": render_budget_line(budgets.status_line(step_count)),
+            "volatile": True,
+        },
+    ]
     return messages
 
 

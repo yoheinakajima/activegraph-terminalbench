@@ -42,6 +42,8 @@ class FakeLLM:
             text=text,
             input_tokens=10,
             output_tokens=5,
+            cache_creation_input_tokens=0,
+            cache_read_input_tokens=0,
             latency_sec=0.01,
             model=self.model,
             retries=0,

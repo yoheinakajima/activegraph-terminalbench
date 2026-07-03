@@ -183,6 +183,38 @@ def write_outputs(
             print(f"  - {problem}")
 
 
+def cache_stats(job_dirs: list[Path]) -> dict:
+    """Aggregate prompt-cache usage over every trial's agent/summary.json.
+
+    Trials from agents that predate the cache fields (or non-harness agents
+    with no summary.json at all) contribute zeros and are counted in
+    n_trials_without_cache_fields rather than silently skipped.
+    """
+    tokens_in = tokens_out = cache_read = cache_creation = 0
+    n_with = n_without = 0
+    for job_dir in job_dirs:
+        for path in sorted(job_dir.glob("*/agent/summary.json")):
+            summary = json.loads(path.read_text())
+            tokens_in += summary.get("tokens_in") or 0
+            tokens_out += summary.get("tokens_out") or 0
+            if "tokens_cache_read" in summary:
+                n_with += 1
+                cache_read += summary["tokens_cache_read"]
+                cache_creation += summary["tokens_cache_creation"]
+            else:
+                n_without += 1
+    hit_rate = round(cache_read / tokens_in, 4) if tokens_in else 0.0
+    return {
+        "tokens_in": tokens_in,
+        "tokens_out": tokens_out,
+        "tokens_cache_read": cache_read,
+        "tokens_cache_creation": cache_creation,
+        "cache_hit_rate": hit_rate,
+        "n_trials_with_cache_fields": n_with,
+        "n_trials_without_cache_fields": n_without,
+    }
+
+
 def main(argv: list[str]) -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument(
@@ -203,7 +235,10 @@ def main(argv: list[str]) -> None:
     trials, problems = load_trials(args.job_dirs)
     tasks, n_runs, matrix = build_matrix(trials)
     metrics = compute_metrics(tasks, n_runs, matrix)
+    cache = cache_stats(args.job_dirs)
+    metrics["cache"] = cache
     write_outputs(args.out_dir, metrics, tasks, n_runs, matrix, problems)
+    print(f"cache_hit_rate: {cache['cache_hit_rate']}")
 
 
 if __name__ == "__main__":

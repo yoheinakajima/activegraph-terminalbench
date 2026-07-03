@@ -33,15 +33,20 @@ Rules:
 - Long output is truncated in the middle before it reaches you; a marker shows how much was cut. Full output is preserved in the run log.
 - Each command has a {command_timeout_sec}s timeout. Prefer commands that finish quickly; background long-running processes and poll them.
 - When you believe the task is complete, verify your work with a final check command first, then respond with "command": null and "done": true.
-- If the budget status below says you are nearly out of steps or time, wrap up: make the state as correct as possible, then finish.
-
-Budget status: {budget_status}
+- A budget status line arrives with each turn. If it says you are nearly out of steps or time, wrap up: make the state as correct as possible, then finish.
 
 The task instruction follows in the first user message."""
 
+# Rendered fresh each turn and appended AFTER the last cache breakpoint, so
+# it never invalidates the cached prefix. Moved out of the system prompt in
+# pass 2: a per-turn countdown inside the system block would have broken the
+# system cache on every request.
+BUDGET_LINE = "Budget status: {budget_status}"
 
-def render_system_prompt(*, command_timeout_sec: int, budget_status: str) -> str:
-    return SYSTEM_PROMPT.format(
-        command_timeout_sec=command_timeout_sec,
-        budget_status=budget_status,
-    )
+
+def render_system_prompt(*, command_timeout_sec: int) -> str:
+    return SYSTEM_PROMPT.format(command_timeout_sec=command_timeout_sec)
+
+
+def render_budget_line(budget_status: str) -> str:
+    return BUDGET_LINE.format(budget_status=budget_status)
