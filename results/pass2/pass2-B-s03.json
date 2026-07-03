@@ -1,0 +1,249 @@
+{
+  "label": "B",
+  "job_dirs": [
+    "runs/pass2-B-s03"
+  ],
+  "n_trials": 24,
+  "trials": [
+    {
+      "task": "crack-7z-hash",
+      "trial": "crack-7z-hash__LX4unGu",
+      "started_at": "2026-07-03T21:13:03.486187Z",
+      "reward": null,
+      "exception": "RuntimeError",
+      "n_input_tokens": null,
+      "n_cache_tokens": null,
+      "n_output_tokens": null
+    },
+    {
+      "task": "crack-7z-hash",
+      "trial": "crack-7z-hash__QcHRdcQ",
+      "started_at": "2026-07-03T21:13:01.561628Z",
+      "reward": null,
+      "exception": "RuntimeError",
+      "n_input_tokens": null,
+      "n_cache_tokens": null,
+      "n_output_tokens": null
+    },
+    {
+      "task": "crack-7z-hash",
+      "trial": "crack-7z-hash__hijCqhP",
+      "started_at": "2026-07-03T21:12:59.678655Z",
+      "reward": null,
+      "exception": "RuntimeError",
+      "n_input_tokens": null,
+      "n_cache_tokens": null,
+      "n_output_tokens": null
+    },
+    {
+      "task": "custom-memory-heap-crash",
+      "trial": "custom-memory-heap-crash__EiJURPZ",
+      "started_at": "2026-07-03T21:12:59.708627Z",
+      "reward": null,
+      "exception": "RuntimeError",
+      "n_input_tokens": null,
+      "n_cache_tokens": null,
+      "n_output_tokens": null
+    },
+    {
+      "task": "custom-memory-heap-crash",
+      "trial": "custom-memory-heap-crash__JKHo9C2",
+      "started_at": "2026-07-03T21:13:01.649263Z",
+      "reward": null,
+      "exception": "RuntimeError",
+      "n_input_tokens": null,
+      "n_cache_tokens": null,
+      "n_output_tokens": null
+    },
+    {
+      "task": "custom-memory-heap-crash",
+      "trial": "custom-memory-heap-crash__ZkpfbwT",
+      "started_at": "2026-07-03T21:13:03.552938Z",
+      "reward": null,
+      "exception": "RuntimeError",
+      "n_input_tokens": null,
+      "n_cache_tokens": null,
+      "n_output_tokens": null
+    },
+    {
+      "task": "db-wal-recovery",
+      "trial": "db-wal-recovery__GJUhDMk",
+      "started_at": "2026-07-03T21:13:01.777425Z",
+      "reward": null,
+      "exception": "RuntimeError",
+      "n_input_tokens": null,
+      "n_cache_tokens": null,
+      "n_output_tokens": null
+    },
+    {
+      "task": "db-wal-recovery",
+      "trial": "db-wal-recovery__eh9g5mJ",
+      "started_at": "2026-07-03T21:12:59.711690Z",
+      "reward": null,
+      "exception": "RuntimeError",
+      "n_input_tokens": null,
+      "n_cache_tokens": null,
+      "n_output_tokens": null
+    },
+    {
+      "task": "db-wal-recovery",
+      "trial": "db-wal-recovery__gFEH2jh",
+      "started_at": "2026-07-03T21:13:03.812588Z",
+      "reward": null,
+      "exception": "RuntimeError",
+      "n_input_tokens": null,
+      "n_cache_tokens": null,
+      "n_output_tokens": null
+    },
+    {
+      "task": "distribution-search",
+      "trial": "distribution-search__3cuXGqx",
+      "started_at": "2026-07-03T21:13:03.891877Z",
+      "reward": null,
+      "exception": "RuntimeError",
+      "n_input_tokens": null,
+      "n_cache_tokens": null,
+      "n_output_tokens": null
+    },
+    {
+      "task": "distribution-search",
+      "trial": "distribution-search__RUUSKoJ",
+      "started_at": "2026-07-03T21:12:59.714208Z",
+      "reward": null,
+      "exception": "RuntimeError",
+      "n_input_tokens": null,
+      "n_cache_tokens": null,
+      "n_output_tokens": null
+    },
+    {
+      "task": "distribution-search",
+      "trial": "distribution-search__wJX6XsX",
+      "started_at": "2026-07-03T21:13:01.860238Z",
+      "reward": null,
+      "exception": "RuntimeError",
+      "n_input_tokens": null,
+      "n_cache_tokens": null,
+      "n_output_tokens": null
+    },
+    {
+      "task": "dna-assembly",
+      "trial": "dna-assembly__9esjHxx",
+      "started_at": "2026-07-03T21:13:02.521622Z",
+      "reward": null,
+      "exception": "RuntimeError",
+      "n_input_tokens": null,
+      "n_cache_tokens": null,
+      "n_output_tokens": null
+    },
+    {
+      "task": "dna-assembly",
+      "trial": "dna-assembly__Cg5Me6s",
+      "started_at": "2026-07-03T21:13:04.468302Z",
+      "reward": null,
+      "exception": "RuntimeError",
+      "n_input_tokens": null,
+      "n_cache_tokens": null,
+      "n_output_tokens": null
+    },
+    {
+      "task": "dna-assembly",
+      "trial": "dna-assembly__SSoBRV5",
+      "started_at": "2026-07-03T21:13:00.619889Z",
+      "reward": null,
+      "exception": "RuntimeError",
+      "n_input_tokens": null,
+      "n_cache_tokens": null,
+      "n_output_tokens": null
+    },
+    {
+      "task": "dna-insert",
+      "trial": "dna-insert__CcyGFKJ",
+      "started_at": "2026-07-03T21:13:04.472568Z",
+      "reward": null,
+      "exception": "RuntimeError",
+      "n_input_tokens": null,
+      "n_cache_tokens": null,
+      "n_output_tokens": null
+    },
+    {
+      "task": "dna-insert",
+      "trial": "dna-insert__X6gxVgk",
+      "started_at": "2026-07-03T21:13:00.690258Z",
+      "reward": null,
+      "exception": "RuntimeError",
+      "n_input_tokens": null,
+      "n_cache_tokens": null,
+      "n_output_tokens": null
+    },
+    {
+      "task": "dna-insert",
+      "trial": "dna-insert__xgrR9QG",
+      "started_at": "2026-07-03T21:13:02.590713Z",
+      "reward": null,
+      "exception": "RuntimeError",
+      "n_input_tokens": null,
+      "n_cache_tokens": null,
+      "n_output_tokens": null
+    },
+    {
+      "task": "extract-elf",
+      "trial": "extract-elf__5BjjMQR",
+      "started_at": "2026-07-03T21:13:02.833254Z",
+      "reward": null,
+      "exception": "RuntimeError",
+      "n_input_tokens": null,
+      "n_cache_tokens": null,
+      "n_output_tokens": null
+    },
+    {
+      "task": "extract-elf",
+      "trial": "extract-elf__j6CLGGF",
+      "started_at": "2026-07-03T21:13:04.787281Z",
+      "reward": null,
+      "exception": "RuntimeError",
+      "n_input_tokens": null,
+      "n_cache_tokens": null,
+      "n_output_tokens": null
+    },
+    {
+      "task": "extract-elf",
+      "trial": "extract-elf__z895RYc",
+      "started_at": "2026-07-03T21:13:00.818895Z",
+      "reward": null,
+      "exception": "RuntimeError",
+      "n_input_tokens": null,
+      "n_cache_tokens": null,
+      "n_output_tokens": null
+    },
+    {
+      "task": "extract-moves-from-video",
+      "trial": "extract-moves-from-video__GomEXi9",
+      "started_at": "2026-07-03T21:13:02.907145Z",
+      "reward": null,
+      "exception": "RuntimeError",
+      "n_input_tokens": null,
+      "n_cache_tokens": null,
+      "n_output_tokens": null
+    },
+    {
+      "task": "extract-moves-from-video",
+      "trial": "extract-moves-from-video__TMFecpL",
+      "started_at": "2026-07-03T21:13:04.880259Z",
+      "reward": null,
+      "exception": "RuntimeError",
+      "n_input_tokens": null,
+      "n_cache_tokens": null,
+      "n_output_tokens": null
+    },
+    {
+      "task": "extract-moves-from-video",
+      "trial": "extract-moves-from-video__YmdEL5o",
+      "started_at": "2026-07-03T21:13:00.908997Z",
+      "reward": null,
+      "exception": "RuntimeError",
+      "n_input_tokens": null,
+      "n_cache_tokens": null,
+      "n_output_tokens": null
+    }
+  ]
+}
