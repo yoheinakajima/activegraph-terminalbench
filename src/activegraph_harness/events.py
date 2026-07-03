@@ -20,6 +20,7 @@ Idioms used here, verified against activegraph 1.1.0 source:
 from __future__ import annotations
 
 import json
+import re
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -34,9 +35,11 @@ from activegraph_harness import __version__
 ENVELOPE_FIELDS = ("step", "trial_id", "task_id", "agent_version", "model")
 
 # Append-only event vocabulary. "llm_retry" and "noop_turn" are harness
-# extensions beyond the original spec list; see DECISIONS.md.
+# extensions beyond the original spec list; "context_built" is the pass 2
+# audit trail for what the model was shown each turn; see DECISIONS.md.
 EVENT_TYPES = (
     "task_started",
+    "context_built",
     "model_turn",
     "command_executed",
     "output_observed",
@@ -78,6 +81,10 @@ class ErrorData(BaseModel):
     message: str
 
 
+class FileData(BaseModel):
+    path: str
+
+
 HARNESS_PACK = Pack(
     name="activegraph_harness",
     version=__version__,
@@ -92,6 +99,9 @@ HARNESS_PACK = Pack(
             description="Result of executing a command",
         ),
         ObjectType(name="error", schema=ErrorData, description="An observed failure"),
+        # Added in 0.2.0 for the v2 retrieval context: file paths a command
+        # plausibly touched, extracted heuristically from the command text.
+        ObjectType(name="file", schema=FileData, description="A file path a command touched"),
     ),
     relation_types=(
         RelationType(name="issued", source_types=("step",), target_types=("command",)),
@@ -102,6 +112,8 @@ HARNESS_PACK = Pack(
             name="contains", source_types=("observation",), target_types=("error",)
         ),
         RelationType(name="follows", source_types=("step",), target_types=("step",)),
+        # Added in 0.2.0 for the v2 retrieval context.
+        RelationType(name="touches", source_types=("command",), target_types=("file",)),
     ),
 )
 
@@ -225,6 +237,51 @@ def add_observation_object(
     )
     log.graph.add_relation(command_object_id, obj.id, "produced", actor="agent")
     return obj.id
+
+
+# Heuristic: path-shaped tokens (something/something) or bare filenames with
+# a code/config extension. URLs and option flags are excluded. This feeds
+# the v2 retrieval context and is deliberately loose; a false positive costs
+# one stale line of context, a false negative loses one hint.
+_URL_RE = re.compile(r"\b\w+://\S+")
+_FILE_PATH_RE = re.compile(
+    r"(?<![\w@:-])"
+    r"((?:/|\./)?(?:[\w.+-]+/)+[\w.+-]+"
+    r"|[\w+-]+\.(?:py|c|cc|cpp|h|hpp|rs|go|js|ts|json|yaml|yml|toml|txt|md|sh|"
+    r"csv|sql|html|css|xml|cfg|ini|conf|log|patch|diff|tex|ipynb|lock|gz|tar|zip))"
+    r"(?![\w/])"
+)
+MAX_FILES_PER_COMMAND = 20
+
+
+def extract_file_paths(command: str) -> list[str]:
+    """Pull file-path-looking tokens out of a shell command, best effort."""
+    text = _URL_RE.sub(" ", command)
+    seen: list[str] = []
+    for match in _FILE_PATH_RE.finditer(text):
+        path = match.group(1).rstrip("/.")
+        if path and path not in seen:
+            seen.append(path)
+        if len(seen) >= MAX_FILES_PER_COMMAND:
+            break
+    return seen
+
+
+def add_file_objects(
+    log: TrialLog, command_object_id: str, paths: list[str]
+) -> list[str]:
+    """Record files a command touched: one file object per distinct path in
+    the trial (reused across commands), each linked with a touches edge."""
+    ids = []
+    for path in paths:
+        existing = log.graph.objects(type="file", where={"path": path})
+        if existing:
+            file_id = existing[0].id
+        else:
+            file_id = log.graph.add_object("file", {"path": path}, actor="agent").id
+        log.graph.add_relation(command_object_id, file_id, "touches", actor="agent")
+        ids.append(file_id)
+    return ids
 
 
 def add_error_object(

@@ -40,10 +40,9 @@ def build_context(log: TrialLog, instruction: str, step_count: int, budgets) -> 
     Returns:
         A message list for llm.LLMClient.complete(). messages[0] is the
         system message; the rest alternate user/assistant and end with
-        a user message. Message content is a plain string, except the
-        final message: a list of text blocks where blocks flagged
-        "volatile": True change every turn and must stay after the moving
-        cache breakpoint (see llm.apply_cache_control).
+        a user message. Message content is a plain string or a list of
+        text blocks; blocks flagged "cache": True are stable across turns
+        and become cache breakpoints (see llm.apply_cache_control).
 
     v2 (future): replace the verbatim tail with a retrieved subgraph:
     the active error object and its `contains` chain, the files it
@@ -73,21 +72,28 @@ def build_context(log: TrialLog, instruction: str, step_count: int, budgets) -> 
         messages.append({"role": "assistant", "content": assistant_text})
         messages.append({"role": "user", "content": user_text})
 
-    # The per-turn budget countdown rides in a volatile block AFTER the last
-    # stable block of the final message. llm.apply_cache_control() puts the
-    # moving cache breakpoint on the stable block, so the countdown never
-    # invalidates the cached transcript prefix. Caching tradeoff, v1: a big
+    # The moving cache breakpoint sits on the final feedback block ("cache":
+    # True, translated by llm.apply_cache_control), so each turn reads the
+    # whole prior transcript from cache and writes only the new tail. The
+    # per-turn budget countdown rides in an unmarked block AFTER it and
+    # never invalidates the cached prefix. Caching tradeoff, v1: a big
     # input that is mostly cache reads while the tail window is not yet
-    # sliding (the first MAX_TAIL_EXCHANGES exchanges); once trimming starts,
-    # the omission counter in the first user message changes every turn and
-    # the transcript prefix misses by design. That is a v1 structural cost.
+    # sliding. Once trimming starts, the omission counter in the first user
+    # message changes every turn, so the prefix can never hit again; the
+    # breakpoint is dropped then, because a guaranteed-miss write bills
+    # 1.25x for cache entries nothing will ever read (measured live: every
+    # post-trim turn rewrote ~11k tokens for zero reads). Post-trim turns
+    # pay plain input price. That is a v1 structural cost; v2 exists to
+    # remove it.
     final = messages[-1]
+    feedback_block: dict = {"type": "text", "text": final["content"]}
+    if not omitted:
+        feedback_block["cache"] = True
     final["content"] = [
-        {"type": "text", "text": final["content"]},
+        feedback_block,
         {
             "type": "text",
             "text": render_budget_line(budgets.status_line(step_count)),
-            "volatile": True,
         },
     ]
     return messages

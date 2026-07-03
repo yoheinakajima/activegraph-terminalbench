@@ -153,8 +153,13 @@ async def run_loop(
     llm: ModelClient,
     budgets: Budgets,
     record_turn: Callable[[TurnRecord], None],
+    context_builder: Callable[..., list[dict]] = build_context,
 ) -> LoopResult:
     """Run the ReAct loop until done or budget exhaustion.
+
+    context_builder is the retrieval seam: any callable with
+    build_context's signature. The loop never knows which version it got;
+    the builder logs its own context_built audit event.
 
     Raises on unrecoverable errors (LLM failure after retries, store
     failure); the caller logs and exports in its finally block. Command
@@ -193,7 +198,7 @@ async def run_loop(
             )
 
         # 1. Assemble context (the one retrieval seam).
-        messages = build_context(log, instruction, step, budgets)
+        messages = context_builder(log, instruction, step, budgets)
 
         # 2. Call the model. LLM retries are logged from inside the client.
         def log_llm_event(event_type: str, payload: dict[str, Any], _step=step) -> None:
@@ -376,6 +381,9 @@ async def run_loop(
         # 6. Execute the command in the task container.
         command_object_id = events.add_command_object(
             log, step_object_id, command, budgets.command_timeout_sec
+        )
+        events.add_file_objects(
+            log, command_object_id, events.extract_file_paths(command)
         )
         command_started = time.monotonic()
         exec_error: str | None = None

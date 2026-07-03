@@ -82,60 +82,50 @@ def split_system(messages: list[dict[str, Any]]) -> tuple[Any, list[dict[str, An
 
 
 def apply_cache_control(system: Any, turns: list[dict[str, Any]]) -> tuple[Any, list[dict[str, Any]]]:
-    """Place prompt-cache breakpoints on the request.
+    """Translate build_context's cache marks into API cache breakpoints.
 
-    Breakpoint budget (API maximum is 4 per request; this uses 2):
-    1. The system prompt, which is identical every turn of a trial.
-    2. The last STABLE text block of the final message, so each turn reads
-       the whole prior transcript from cache and writes only the new tail.
+    Breakpoint placement is decided by the context builder, which knows
+    which text is stable across turns; this function only translates:
+    1. The system prompt always gets a breakpoint (identical every turn).
+    2. Any content block carrying the harness-internal flag "cache": True
+       gets cache_control; the flag itself is stripped (the API rejects
+       unknown fields). Blocks without the flag stay uncached and must
+       hold all per-turn volatile text (budget countdown, retrieved slice).
 
-    build_context() marks per-turn volatile text (the budget countdown, the
-    v2 retrieved slice) by putting it in blocks AFTER the last stable block
-    of the final message; those blocks stay behind the breakpoint and are
-    never cached. Messages whose content is a plain string are treated as
-    one stable block. Earlier messages are never marked: the server matches
-    the request prefix against the cache entry written at the previous
-    turn's breakpoint, so one moving breakpoint is enough.
+    v1 marks the final message's feedback block, so each turn reads the
+    whole prior transcript from cache and writes only the new tail. v2
+    marks only the stable prefix (the task instruction) and deliberately
+    leaves its small rebuilt-each-turn slice uncached.
 
-    Content blocks below the model's minimum cacheable prefix (1024 tokens
+    The API allows at most 4 breakpoints per request; system takes one, so
+    a builder may mark at most 3 blocks. More than that is a bug and
+    raises. Blocks below the model's minimum cacheable prefix (1024 tokens
     on Sonnet, 4096 on Haiku 4.5) are silently not cached by the API; both
     usage counters just read 0. That is expected on small early turns.
     """
     system_blocks = [
         {"type": "text", "text": system, "cache_control": {"type": "ephemeral"}}
     ]
+    marked = 0
     cached_turns = []
     for turn in turns:
-        turn = dict(turn)
-        if not isinstance(turn["content"], str):
-            # Strip the harness-internal volatile flag; the API rejects
-            # unknown block fields.
-            turn["content"] = [
-                {k: v for k, v in block.items() if k != "volatile"}
-                for block in turn["content"]
-            ]
-        cached_turns.append(turn)
-    if not cached_turns:
-        return system_blocks, cached_turns
-
-    final = cached_turns[-1]
-    original_content = turns[-1]["content"]
-    if isinstance(original_content, str):
-        blocks = [{"type": "text", "text": original_content}]
-        stable_indices = [0]
-    else:
-        blocks = final["content"]
-        stable_indices = [
-            i
-            for i, block in enumerate(original_content)
-            if not block.get("volatile", False)
-        ]
-    if stable_indices:
-        blocks[stable_indices[-1]] = {
-            **blocks[stable_indices[-1]],
-            "cache_control": {"type": "ephemeral"},
-        }
-    final["content"] = blocks
+        content = turn["content"]
+        if isinstance(content, str):
+            cached_turns.append(dict(turn))
+            continue
+        blocks = []
+        for block in content:
+            block = dict(block)
+            if block.pop("cache", False):
+                marked += 1
+                block["cache_control"] = {"type": "ephemeral"}
+            blocks.append(block)
+        cached_turns.append({**turn, "content": blocks})
+    if marked > 3:
+        raise LLMError(
+            f"context builder marked {marked} cache blocks; the API allows "
+            "4 breakpoints per request and the system prompt uses one"
+        )
     return system_blocks, cached_turns
 
 

@@ -102,7 +102,7 @@ def test_resolve_model_rejects_foreign_provider():
         llm_mod.resolve_model("openai/gpt-4o")
 
 
-def test_apply_cache_control_places_two_breakpoints():
+def test_apply_cache_control_translates_cache_marks():
     system = "you are a test"
     turns = [
         {"role": "user", "content": "instruction"},
@@ -110,8 +110,8 @@ def test_apply_cache_control_places_two_breakpoints():
         {
             "role": "user",
             "content": [
-                {"type": "text", "text": "stable feedback"},
-                {"type": "text", "text": "budget line", "volatile": True},
+                {"type": "text", "text": "stable feedback", "cache": True},
+                {"type": "text", "text": "budget line"},
             ],
         },
     ]
@@ -120,30 +120,37 @@ def test_apply_cache_control_places_two_breakpoints():
     assert system_blocks == [
         {"type": "text", "text": system, "cache_control": {"type": "ephemeral"}}
     ]
-    # Earlier messages pass through untouched.
+    # Plain-string messages pass through untouched.
     assert cached[0] == turns[0]
     assert cached[1] == turns[1]
     final_blocks = cached[2]["content"]
-    # The last stable block carries the moving breakpoint.
+    # The marked block carries the breakpoint, flag stripped.
     assert final_blocks[0] == {
         "type": "text",
         "text": "stable feedback",
         "cache_control": {"type": "ephemeral"},
     }
-    # The volatile block follows the breakpoint, flag stripped, uncached.
+    # The unmarked block stays uncached.
     assert final_blocks[1] == {"type": "text", "text": "budget line"}
     # The input was not mutated.
     assert "cache_control" not in str(turns[2]["content"][0])
 
 
-def test_apply_cache_control_string_final_message():
+def test_apply_cache_control_rejects_too_many_marks():
+    import pytest as _pytest
+
+    turns = [
+        {
+            "role": "user",
+            "content": [{"type": "text", "text": f"b{i}", "cache": True} for i in range(4)],
+        }
+    ]
+    with _pytest.raises(llm_mod.LLMError, match="breakpoints"):
+        llm_mod.apply_cache_control("sys", turns)
+
+
+def test_apply_cache_control_unmarked_messages_stay_plain():
     system_blocks, cached = llm_mod.apply_cache_control(
         "sys", [{"role": "user", "content": "only message"}]
     )
-    assert cached[0]["content"] == [
-        {
-            "type": "text",
-            "text": "only message",
-            "cache_control": {"type": "ephemeral"},
-        }
-    ]
+    assert cached[0]["content"] == "only message"
