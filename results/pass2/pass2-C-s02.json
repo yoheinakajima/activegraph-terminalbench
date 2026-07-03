@@ -1,0 +1,249 @@
+{
+  "label": "C",
+  "job_dirs": [
+    "runs/pass2-C-s02"
+  ],
+  "n_trials": 24,
+  "trials": [
+    {
+      "task": "chess-best-move",
+      "trial": "chess-best-move__MdBxEHY",
+      "started_at": "2026-07-03T21:14:16.645804Z",
+      "reward": null,
+      "exception": "RuntimeError",
+      "n_input_tokens": null,
+      "n_cache_tokens": null,
+      "n_output_tokens": null
+    },
+    {
+      "task": "chess-best-move",
+      "trial": "chess-best-move__kj3hATf",
+      "started_at": "2026-07-03T21:14:20.537892Z",
+      "reward": null,
+      "exception": "RuntimeError",
+      "n_input_tokens": null,
+      "n_cache_tokens": null,
+      "n_output_tokens": null
+    },
+    {
+      "task": "chess-best-move",
+      "trial": "chess-best-move__kjqbyPb",
+      "started_at": "2026-07-03T21:14:18.602964Z",
+      "reward": null,
+      "exception": "RuntimeError",
+      "n_input_tokens": null,
+      "n_cache_tokens": null,
+      "n_output_tokens": null
+    },
+    {
+      "task": "circuit-fibsqrt",
+      "trial": "circuit-fibsqrt__4zE85Mh",
+      "started_at": "2026-07-03T21:14:18.686220Z",
+      "reward": null,
+      "exception": "RuntimeError",
+      "n_input_tokens": null,
+      "n_cache_tokens": null,
+      "n_output_tokens": null
+    },
+    {
+      "task": "circuit-fibsqrt",
+      "trial": "circuit-fibsqrt__6SqqbdM",
+      "started_at": "2026-07-03T21:14:16.684669Z",
+      "reward": null,
+      "exception": "RuntimeError",
+      "n_input_tokens": null,
+      "n_cache_tokens": null,
+      "n_output_tokens": null
+    },
+    {
+      "task": "circuit-fibsqrt",
+      "trial": "circuit-fibsqrt__owWpeeh",
+      "started_at": "2026-07-03T21:14:20.608449Z",
+      "reward": null,
+      "exception": "RuntimeError",
+      "n_input_tokens": null,
+      "n_cache_tokens": null,
+      "n_output_tokens": null
+    },
+    {
+      "task": "cobol-modernization",
+      "trial": "cobol-modernization__5oP9fKg",
+      "started_at": "2026-07-03T21:14:20.721006Z",
+      "reward": null,
+      "exception": "RuntimeError",
+      "n_input_tokens": null,
+      "n_cache_tokens": null,
+      "n_output_tokens": null
+    },
+    {
+      "task": "cobol-modernization",
+      "trial": "cobol-modernization__LsLSNbM",
+      "started_at": "2026-07-03T21:14:16.689237Z",
+      "reward": null,
+      "exception": "RuntimeError",
+      "n_input_tokens": null,
+      "n_cache_tokens": null,
+      "n_output_tokens": null
+    },
+    {
+      "task": "cobol-modernization",
+      "trial": "cobol-modernization__VafnsSn",
+      "started_at": "2026-07-03T21:14:18.690025Z",
+      "reward": null,
+      "exception": "RuntimeError",
+      "n_input_tokens": null,
+      "n_cache_tokens": null,
+      "n_output_tokens": null
+    },
+    {
+      "task": "code-from-image",
+      "trial": "code-from-image__E6xYZTS",
+      "started_at": "2026-07-03T21:14:18.810571Z",
+      "reward": null,
+      "exception": "RuntimeError",
+      "n_input_tokens": null,
+      "n_cache_tokens": null,
+      "n_output_tokens": null
+    },
+    {
+      "task": "code-from-image",
+      "trial": "code-from-image__diqhj6h",
+      "started_at": "2026-07-03T21:14:16.692044Z",
+      "reward": null,
+      "exception": "RuntimeError",
+      "n_input_tokens": null,
+      "n_cache_tokens": null,
+      "n_output_tokens": null
+    },
+    {
+      "task": "code-from-image",
+      "trial": "code-from-image__rr8BVE3",
+      "started_at": "2026-07-03T21:14:20.794479Z",
+      "reward": null,
+      "exception": "RuntimeError",
+      "n_input_tokens": null,
+      "n_cache_tokens": null,
+      "n_output_tokens": null
+    },
+    {
+      "task": "compile-compcert",
+      "trial": "compile-compcert__5PMGgo8",
+      "started_at": "2026-07-03T21:14:21.537876Z",
+      "reward": null,
+      "exception": "RuntimeError",
+      "n_input_tokens": null,
+      "n_cache_tokens": null,
+      "n_output_tokens": null
+    },
+    {
+      "task": "compile-compcert",
+      "trial": "compile-compcert__W8zdHGA",
+      "started_at": "2026-07-03T21:14:19.594953Z",
+      "reward": null,
+      "exception": "RuntimeError",
+      "n_input_tokens": null,
+      "n_cache_tokens": null,
+      "n_output_tokens": null
+    },
+    {
+      "task": "compile-compcert",
+      "trial": "compile-compcert__xwamr3B",
+      "started_at": "2026-07-03T21:14:17.644634Z",
+      "reward": null,
+      "exception": "RuntimeError",
+      "n_input_tokens": null,
+      "n_cache_tokens": null,
+      "n_output_tokens": null
+    },
+    {
+      "task": "configure-git-webserver",
+      "trial": "configure-git-webserver__XhDS95d",
+      "started_at": "2026-07-03T21:14:19.598652Z",
+      "reward": null,
+      "exception": "RuntimeError",
+      "n_input_tokens": null,
+      "n_cache_tokens": null,
+      "n_output_tokens": null
+    },
+    {
+      "task": "configure-git-webserver",
+      "trial": "configure-git-webserver__YXqRdyb",
+      "started_at": "2026-07-03T21:14:21.603253Z",
+      "reward": null,
+      "exception": "RuntimeError",
+      "n_input_tokens": null,
+      "n_cache_tokens": null,
+      "n_output_tokens": null
+    },
+    {
+      "task": "configure-git-webserver",
+      "trial": "configure-git-webserver__aGDsyKW",
+      "started_at": "2026-07-03T21:14:17.722901Z",
+      "reward": null,
+      "exception": "RuntimeError",
+      "n_input_tokens": null,
+      "n_cache_tokens": null,
+      "n_output_tokens": null
+    },
+    {
+      "task": "constraints-scheduling",
+      "trial": "constraints-scheduling__9nxasN6",
+      "started_at": "2026-07-03T21:14:17.727016Z",
+      "reward": null,
+      "exception": "RuntimeError",
+      "n_input_tokens": null,
+      "n_cache_tokens": null,
+      "n_output_tokens": null
+    },
+    {
+      "task": "constraints-scheduling",
+      "trial": "constraints-scheduling__NbNrfon",
+      "started_at": "2026-07-03T21:14:21.687160Z",
+      "reward": null,
+      "exception": "RuntimeError",
+      "n_input_tokens": null,
+      "n_cache_tokens": null,
+      "n_output_tokens": null
+    },
+    {
+      "task": "constraints-scheduling",
+      "trial": "constraints-scheduling__ugzbMWC",
+      "started_at": "2026-07-03T21:14:19.736537Z",
+      "reward": null,
+      "exception": "RuntimeError",
+      "n_input_tokens": null,
+      "n_cache_tokens": null,
+      "n_output_tokens": null
+    },
+    {
+      "task": "count-dataset-tokens",
+      "trial": "count-dataset-tokens__2y98cpE",
+      "started_at": "2026-07-03T21:14:17.851298Z",
+      "reward": null,
+      "exception": "RuntimeError",
+      "n_input_tokens": null,
+      "n_cache_tokens": null,
+      "n_output_tokens": null
+    },
+    {
+      "task": "count-dataset-tokens",
+      "trial": "count-dataset-tokens__Vys5pMk",
+      "started_at": "2026-07-03T21:14:19.739872Z",
+      "reward": null,
+      "exception": "RuntimeError",
+      "n_input_tokens": null,
+      "n_cache_tokens": null,
+      "n_output_tokens": null
+    },
+    {
+      "task": "count-dataset-tokens",
+      "trial": "count-dataset-tokens__wDHcaeb",
+      "started_at": "2026-07-03T21:14:21.756503Z",
+      "reward": null,
+      "exception": "RuntimeError",
+      "n_input_tokens": null,
+      "n_cache_tokens": null,
+      "n_output_tokens": null
+    }
+  ]
+}
