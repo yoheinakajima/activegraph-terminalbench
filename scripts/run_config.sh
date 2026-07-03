@@ -17,6 +17,7 @@ shift
 : "${AGENT_FLAGS:?set AGENT_FLAGS (agent + model flags for harbor run)}"
 K="${K:-3}"
 MIN_FREE_GB="${MIN_FREE_GB:-16}"
+OVERLAY="${OVERLAY:-.cache/tls-overlay-astral.yaml}"
 
 for chunk in "$@"; do
     name="pass2-${LABEL}-$(basename "${chunk%.txt}")"
@@ -42,7 +43,7 @@ for chunk in "$@"; do
     uv run harbor run --dataset terminal-bench@2.0 ${AGENT_FLAGS} ${task_args} \
         -k "$K" --n-concurrent 4 --jobs-dir runs --job-name "$name" \
         --registry-path .cache/registry.json \
-        --extra-docker-compose .cache/tls-overlay-astral.yaml
+        --extra-docker-compose "$OVERLAY"
     uv run python scripts/collect_chunk.py "runs/$name" --out "$out" --label "$LABEL"
     git add "$out"
     git commit -q -m "pass2: collect ${name}"
