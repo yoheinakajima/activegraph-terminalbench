@@ -1,0 +1,8 @@
+polyglot-c-py
+polyglot-rust-c
+portfolio-optimization
+protein-assembly
+prove-plus-comm
+pypi-server
+pytorch-model-cli
+qemu-alpine-ssh
