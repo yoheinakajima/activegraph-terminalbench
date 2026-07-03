@@ -37,6 +37,7 @@ from harbor.utils.import_path import import_class
 from harbor.utils.trajectory_utils import format_trajectory_json
 
 from activegraph_harness import __version__, events
+from activegraph_harness.context import build_context, build_context_v2
 from activegraph_harness.events import TrialLog
 from activegraph_harness.llm import LLMClient, resolve_model
 from activegraph_harness.loop import (
@@ -53,6 +54,8 @@ EVENT_LOG_FILENAME = "event_log.json"
 SUMMARY_FILENAME = "summary.json"
 STORE_FILENAME = "events.sqlite"
 TRAJECTORY_FILENAME = "trajectory.json"
+
+CONTEXT_BUILDERS = {"v1": build_context, "v2": build_context_v2}
 
 
 def _parse_bool(value: object) -> bool:
@@ -80,6 +83,7 @@ class ActiveGraphAgent(BaseAgent):
         wall_clock_budget_sec: float = DEFAULT_WALL_CLOCK_BUDGET_SEC,
         llm_client_import_path: str = "activegraph_harness.llm:LLMClient",
         enable_prompt_caching: bool = True,
+        context_version: str = "v1",
         *args,
         **kwargs,
     ):
@@ -95,6 +99,9 @@ class ActiveGraphAgent(BaseAgent):
             enable_prompt_caching: Place cache_control breakpoints on
                 requests (see llm.apply_cache_control). On by default;
                 --ak enable_prompt_caching=false restores pass 1 behavior.
+            context_version: Which build_context the loop gets: "v1"
+                (verbatim transcript tail) or "v2" (graph retrieval).
+                --ak context_version=v2 selects v2; the loop never knows.
         """
         super().__init__(logs_dir, model_name, *args, **kwargs)
         self._max_steps = int(max_steps)
@@ -102,6 +109,12 @@ class ActiveGraphAgent(BaseAgent):
         self._wall_clock_budget_sec = float(wall_clock_budget_sec)
         self._llm_client_import_path = llm_client_import_path
         self._enable_prompt_caching = _parse_bool(enable_prompt_caching)
+        if context_version not in CONTEXT_BUILDERS:
+            raise ValueError(
+                f"unknown context_version {context_version!r}; "
+                f"expected one of {sorted(CONTEXT_BUILDERS)}"
+            )
+        self._context_version = context_version
         self._environment_info: dict[str, str] = {}
 
     @staticmethod
@@ -172,6 +185,8 @@ class ActiveGraphAgent(BaseAgent):
                     "wall_clock_sec": budgets.wall_clock_sec,
                     "command_timeout_sec": budgets.command_timeout_sec,
                 },
+                "context_version": self._context_version,
+                "prompt_caching": self._enable_prompt_caching,
             },
         )
 
@@ -187,6 +202,7 @@ class ActiveGraphAgent(BaseAgent):
                 llm=llm,
                 budgets=budgets,
                 record_turn=recorder.record,
+                context_builder=CONTEXT_BUILDERS[self._context_version],
             )
         except Exception as exc:
             fatal_error = f"{type(exc).__name__}: {exc}"
@@ -213,6 +229,8 @@ class ActiveGraphAgent(BaseAgent):
                         "tokens_cache_creation": recorder.total_cache_creation_tokens,
                         "tokens_cache_read": recorder.total_cache_read_tokens,
                         "cache_hit_rate": recorder.cache_hit_rate(),
+                        "context_version": self._context_version,
+                        "prompt_caching": self._enable_prompt_caching,
                         "wall_time_sec": wall_time,
                     },
                 )

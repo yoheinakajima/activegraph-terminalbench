@@ -197,3 +197,46 @@ Still NOT verified, and why:
   syncs the whole `agent/` dir; a shared cross-trial store (for cross-run
   memory experiments) would be a schema change, not a refactor, thanks to
   ActiveGraph's per-run scoping.
+
+## Pass 2 decisions (2026-07-03, second session)
+
+1. **Budget status moved out of the system prompt.** Pass 1 rendered the
+   per-turn countdown inside the system block, which would have
+   invalidated the system cache on every request. It now arrives as an
+   uncached text block appended after the last cache breakpoint of the
+   final message (v1) or inline after the retrieved slice (v2). This is
+   the one model-visible divergence between pass 1 and Run A; the words
+   are identical, only the position changed.
+2. **Cache breakpoints are marked by the context builder,** as a
+   harness-internal "cache": True flag on content blocks, translated to
+   API cache_control by llm.apply_cache_control (which also always marks
+   the system prompt, and rejects more than 3 marked blocks since the API
+   caps breakpoints at 4). Placement is a retrieval concern: v1 marks the
+   final feedback block (read the whole transcript from cache, write only
+   the tail), v2 marks only the task instruction (the slice is rebuilt
+   every turn, and caching it would bill 1.25x for entries that can never
+   hit).
+3. **v1 stops paying for cache once its window slides.** Measured live
+   before the fix: after MAX_TAIL_EXCHANGES the omission counter changes
+   every turn, so every request rewrote ~11k cache tokens for zero reads.
+   Post-trim turns now carry no moving breakpoint and pay plain input
+   price. Smoke test on fix-code-vulnerability (haiku, 39 turns): 53.2%
+   cache hit rate, 0.53x effective input cost, no wasted writes.
+4. **The smoke assertion was adapted from the spec.** "cache reads from
+   turn 3 onward" holds only while the v1 window is stable; the committed
+   check (scripts/cache_smoke_check.py) asserts reads for turns 3 through
+   MAX_TAIL_EXCHANGES+1, near-zero cache writes after that, and effective
+   cost below uncached.
+5. **Schema additions for v2 (pack 0.2.0):** a `file` object type
+   (path) and a `touches` relation (command -> file). Paths are extracted
+   from command text by a deliberately loose heuristic
+   (events.extract_file_paths); a false positive costs one stale context
+   line. Pass 1 had no file tracking, and the v2 contract needs "files
+   touched so far". Also added the `context_built` event type: version,
+   message count, token estimate, and (v2) the retrieved object ids, per
+   turn. Emitted by the builders themselves so the loop stays ignorant of
+   the context version.
+6. **v2 is selected by agent kwarg** (--ak context_version=v2), mapped to
+   a context_builder callable passed into run_loop. The loop signature
+   grew one defaulted parameter; the loop body still calls whatever
+   builder it was handed.
