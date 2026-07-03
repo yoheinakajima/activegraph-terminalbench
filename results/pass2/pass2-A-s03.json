@@ -67,23 +67,24 @@
     },
     {
       "task": "custom-memory-heap-crash",
-      "trial": "custom-memory-heap-crash__S8hnkpR",
-      "started_at": "2026-07-03T16:18:42.034796Z",
-      "reward": null,
-      "exception": "RuntimeError",
-      "n_input_tokens": 420383,
-      "n_cache_tokens": 138580,
-      "n_output_tokens": 14206,
+      "trial": "custom-memory-heap-crash__hwmtQne",
+      "started_at": "2026-07-03T17:08:41.628575Z",
+      "reward": 1.0,
+      "exception": null,
+      "n_input_tokens": 256477,
+      "n_cache_tokens": 144916,
+      "n_output_tokens": 8869,
       "finish_reason": "task_finished",
-      "steps": 57,
-      "tokens_in": 420383,
-      "tokens_in_uncached": 270754,
-      "tokens_cache_read": 138580,
-      "tokens_cache_creation": 11049,
-      "cache_hit_rate": 0.3297,
+      "steps": 34,
+      "tokens_in": 256477,
+      "tokens_in_uncached": 99843,
+      "tokens_cache_read": 144916,
+      "tokens_cache_creation": 11718,
+      "cache_hit_rate": 0.565,
       "context_version": "v1",
-      "tokens_out": 14206,
-      "wall_time_sec": 297.767
+      "tokens_out": 8869,
+      "wall_time_sec": 188.52,
+      "note": "make-up trial replacing custom-memory-heap-crash__S8hnkpR, which hung in harbor artifact collection (agent had finished; infra, not agent)"
     },
     {
       "task": "custom-memory-heap-crash",
@@ -485,5 +486,6 @@
       "tokens_out": 4462,
       "wall_time_sec": 227.128
     }
-  ]
+  ],
+  "note": "custom-memory-heap-crash__S8hnkpR (RuntimeError on kill after harbor hang) replaced by make-up trial from pass2-A-s03b.json"
 }

@@ -1,0 +1,29 @@
+{
+  "label": "A",
+  "job_dirs": [
+    "runs/pass2-A-s03b"
+  ],
+  "n_trials": 1,
+  "trials": [
+    {
+      "task": "custom-memory-heap-crash",
+      "trial": "custom-memory-heap-crash__hwmtQne",
+      "started_at": "2026-07-03T17:08:41.628575Z",
+      "reward": 1.0,
+      "exception": null,
+      "n_input_tokens": 256477,
+      "n_cache_tokens": 144916,
+      "n_output_tokens": 8869,
+      "finish_reason": "task_finished",
+      "steps": 34,
+      "tokens_in": 256477,
+      "tokens_in_uncached": 99843,
+      "tokens_cache_read": 144916,
+      "tokens_cache_creation": 11718,
+      "cache_hit_rate": 0.565,
+      "context_version": "v1",
+      "tokens_out": 8869,
+      "wall_time_sec": 188.52
+    }
+  ]
+}
