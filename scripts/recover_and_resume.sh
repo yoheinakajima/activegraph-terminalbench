@@ -13,8 +13,9 @@ git fetch origin "$BRANCH"
 git reset --hard "origin/$BRANCH"
 bash scripts/rebuild_sandbox.sh
 
-if pgrep -f "bin/harbor run" > /dev/null; then
-    echo "harbor already running; not relaunching"
+PIDFILE=/tmp/pass2-queue.pid
+if [ -f "$PIDFILE" ] && kill -0 "$(cat "$PIDFILE")" 2> /dev/null; then
+    echo "queue already running (pid $(cat "$PIDFILE")); not relaunching"
     exit 0
 fi
 
@@ -30,4 +31,5 @@ export ANTHROPIC_API_KEY=\"\$ANTHROP_API_KEY\"
 AGENT_FLAGS='--agent activegraph_harness.agent:ActiveGraphAgent --model anthropic/claude-sonnet-4-5 --ak enable_cache=true' bash scripts/run_config.sh A $FINE
 AGENT_FLAGS='--agent activegraph_harness.agent:ActiveGraphAgent --model anthropic/claude-sonnet-4-5 --ak context_version=v2' bash scripts/run_config.sh C $CH/s04.txt $CH/s05.txt $FINE
 " > /tmp/run-phase2.log 2>&1 &
+echo $! > "$PIDFILE"
 echo "phase-2 queue resumed"
