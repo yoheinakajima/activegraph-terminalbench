@@ -13,7 +13,7 @@ git fetch origin "$BRANCH"
 git reset --hard "origin/$BRANCH"
 bash scripts/rebuild_sandbox.sh
 
-if pgrep -f "harbor run" > /dev/null; then
+if pgrep -f "bin/harbor run" > /dev/null; then
     echo "harbor already running; not relaunching"
     exit 0
 fi
