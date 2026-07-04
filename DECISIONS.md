@@ -184,6 +184,23 @@ Still NOT verified, and why:
   `--extra-docker-compose` overlay described above (proxy CA bundle +
   astral.sh stand-in + static curl).
 
+- **Phase-1 checkpoint decision (approved):** A and C complete the
+  remaining 65 tasks at k=3; B (terminus-2 control) runs them at k=2.
+  Rationale: phase-1 totals A 37.5% / B 34.7% / C 23.6% average; B cost
+  >=$225 for 24 tasks (two 12000s build-pov-ray trials alone ~$160 via
+  context-summarization loops), projecting the pass-2 total past the
+  approved band at k=3. B keeps k=3 on the checkpoint-24 already run.
+- **The sandbox reset twice more during pass 2** (disk snapshot rolled
+  back to pass-1 state; second reset also wiped dockerd config, .cache,
+  .venv). All chunk artifacts survived because the runner commits and
+  pushes each chunk. Everything ephemeral is now reconstructed by
+  scripts/rebuild_sandbox.sh (committed), validated after rebuild by a
+  free oracle probe on openssl-selfsigned-cert (reward 1.0). The rebuilt
+  stand-in matches the official uv installer contract (uv+uvx binaries,
+  ~/.local/bin/env shim) and the overlays now export
+  SSL_CERT_FILE/UV_NATIVE_TLS so uv/pip verify TLS through the sandbox
+  MITM.
+
 ## Known fragilities
 
 - **Anthropic-only.** `llm.py` speaks the Anthropic Messages API only, per
