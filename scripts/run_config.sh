@@ -26,9 +26,13 @@ for chunk in "$@"; do
         echo "skip ${name}: ${out} already collected"
         continue
     fi
-    if pgrep -f -- "--job-name pass2-" > /dev/null; then
-        echo "FATAL: another harbor run is alive; refusing to clean docker" >&2
-        exit 1
+    # exclusive runner lock: held for the life of this script; prevents a
+    # second runner from cleaning docker under a live harbor run. Immune to
+    # command-line text (pgrep self-matched orchestrating shells).
+    if [ -z "${PASS2_LOCK_HELD:-}" ]; then
+        exec 9> /tmp/pass2-runner.lock
+        flock -n 9 || { echo "FATAL: another runner holds the lock" >&2; exit 1; }
+        export PASS2_LOCK_HELD=1
     fi
     docker ps -aq | xargs -r docker rm -f > /dev/null 2>&1 || true
     docker image prune -af > /dev/null
