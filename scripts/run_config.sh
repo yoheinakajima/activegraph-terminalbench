@@ -35,17 +35,21 @@ for chunk in "$@"; do
         export PASS2_LOCK_HELD=1
     fi
     docker ps -aq | xargs -r docker rm -f > /dev/null 2>&1 || true
-    docker image prune -af > /dev/null
+    docker system prune -af --volumes > /dev/null 2>&1 || docker image prune -af > /dev/null
+    docker builder prune -af > /dev/null 2>&1 || true
     free_gb=$(( $(df --output=avail / | tail -1) / 1048576 ))
     if [ "$free_gb" -lt "$MIN_FREE_GB" ]; then
         echo "FATAL: only ${free_gb}GB free (< ${MIN_FREE_GB}GB) before ${name}" >&2
         exit 1
     fi
     task_args=$(sed 's/^/-i /' "$chunk" | tr '\n' ' ')
+    # giant tasks (g*) build multi-GB images; serialize their trials so
+    # concurrent builds cannot fill the disk (A-g4 died ENOSPC at NC=4)
+    case "$(basename "$chunk" .txt)" in g*) NC=1 ;; *) NC=4 ;; esac
     echo "=== ${name}: $(wc -l < "$chunk") tasks, k=${K}, ${free_gb}GB free ==="
     # shellcheck disable=SC2086
     uv run harbor run --dataset terminal-bench@2.0 ${AGENT_FLAGS} ${task_args} \
-        -k "$K" --n-concurrent 4 --jobs-dir runs --job-name "$name" \
+        -k "$K" --n-concurrent "$NC" --jobs-dir runs --job-name "$name" \
         --registry-path .cache/registry.json \
         --extra-docker-compose "$OVERLAY"
     uv run python scripts/collect_chunk.py "runs/$name" --out "$out" --label "$LABEL"
