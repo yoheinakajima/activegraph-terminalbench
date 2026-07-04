@@ -21,7 +21,12 @@ fi
 
 CH=results/pass2/chunks
 FINE=""
-for c in s06a s06b s07a s07b s08a s08b s09a s09b s10a s10b s11a s11b g1 g2 g3 g4; do
+# g1-g3 (hf-model-inference, mteb-leaderboard, mteb-retrieve) dropped:
+# all three are in results/excluded_tasks.json (huggingface.co blocked by
+# sandbox egress), guaranteed zeros outside the clean subset, and g1's
+# docker build cannot even complete behind the proxy (pip TLS failure
+# repeatedly crashed the queue).
+for c in s06a s06b s07a s07b s08a s08b s09a s09b s10a s10b s11a s11b g4; do
     FINE="$FINE $CH/$c.txt"
 done
 
