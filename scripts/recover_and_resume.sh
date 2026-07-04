@@ -29,6 +29,5 @@ nohup bash -c "
 export ANTHROPIC_API_KEY=\"\$ANTHROP_API_KEY\"
 AGENT_FLAGS='--agent activegraph_harness.agent:ActiveGraphAgent --model anthropic/claude-sonnet-4-5 --ak enable_cache=true' bash scripts/run_config.sh A $FINE
 AGENT_FLAGS='--agent activegraph_harness.agent:ActiveGraphAgent --model anthropic/claude-sonnet-4-5 --ak context_version=v2' bash scripts/run_config.sh C $CH/s04.txt $CH/s05.txt $FINE
-K=2 OVERLAY='.cache/tls-overlay-astral-tmux.yaml' AGENT_FLAGS='--agent terminus-2 --model anthropic/claude-sonnet-4-5' bash scripts/run_config.sh B $CH/s04.txt $CH/s05.txt $FINE
 " > /tmp/run-phase2.log 2>&1 &
 echo "phase-2 queue resumed"

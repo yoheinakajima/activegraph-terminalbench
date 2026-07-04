@@ -184,8 +184,12 @@ Still NOT verified, and why:
   `--extra-docker-compose` overlay described above (proxy CA bundle +
   astral.sh stand-in + static curl).
 
-- **Phase-1 checkpoint decision (approved):** A and C complete the
-  remaining 65 tasks at k=3; B (terminus-2 control) runs them at k=2.
+- **Phase-1 checkpoint decision (superseded, see below):** A and C complete
+  the remaining 65 tasks at k=3; B (terminus-2 control) runs them at k=2.
+- **Revised checkpoint decision (final, approved):** B stops at the
+  checkpoint-24 entirely; the A-vs-B calibration rests on that identical
+  24-task k=3 basis. A and C complete all 89 tasks at k=3. Projected
+  pass-2 total ~$630-680, inside the approved band.
   Rationale: phase-1 totals A 37.5% / B 34.7% / C 23.6% average; B cost
   >=$225 for 24 tasks (two 12000s build-pov-ray trials alone ~$160 via
   context-summarization loops), projecting the pass-2 total past the
