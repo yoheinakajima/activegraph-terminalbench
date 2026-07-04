@@ -1,0 +1,25 @@
+task,A_passes,A_trials,B_passes,B_trials,category
+adaptive-rejection-sampler,1,3,1,3,both (flaky:A+B)
+bn-fit-modify,1,3,2,3,both (flaky:A+B)
+break-filter-js-from-html,0,3,3,3,B_only
+build-cython-ext,0,3,0,3,neither
+build-pmars,0,3,0,3,neither
+build-pov-ray,0,3,0,3,neither
+caffe-cifar-10,0,3,0,3,neither
+cancel-async-tasks,1,3,0,3,A_only (flaky:A)
+chess-best-move,0,3,0,3,neither
+circuit-fibsqrt,0,3,1,3,B_only (flaky:B)
+cobol-modernization,3,3,3,3,both
+code-from-image,2,3,0,3,A_only (flaky:A)
+compile-compcert,3,3,3,3,both
+configure-git-webserver,3,3,3,3,both
+constraints-scheduling,2,3,3,3,both (flaky:A)
+count-dataset-tokens,0,3,0,3,neither
+crack-7z-hash,3,3,1,3,both (flaky:B)
+custom-memory-heap-crash,3,3,3,3,both
+db-wal-recovery,0,3,0,3,neither
+distribution-search,3,3,1,3,both (flaky:B)
+dna-assembly,0,3,0,3,neither
+dna-insert,1,3,0,3,A_only (flaky:A)
+extract-elf,1,3,1,3,both (flaky:A+B)
+extract-moves-from-video,0,3,0,3,neither
