@@ -1,0 +1,4 @@
+sanitize-git-repo
+schemelike-metacircular-eval
+sparql-university
+sqlite-db-truncate

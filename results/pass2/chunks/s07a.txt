@@ -1,0 +1,4 @@
+modernize-scientific-stack
+multi-source-data-merger
+nginx-request-logging
+openssl-selfsigned-cert

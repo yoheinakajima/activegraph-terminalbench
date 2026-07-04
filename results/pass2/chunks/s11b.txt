@@ -1,0 +1,2 @@
+winning-avg-corewars
+write-compressor
