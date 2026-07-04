@@ -26,7 +26,7 @@ for chunk in "$@"; do
         echo "skip ${name}: ${out} already collected"
         continue
     fi
-    if pgrep -f "harbor run" > /dev/null; then
+    if pgrep -f -- "--job-name pass2-" > /dev/null; then
         echo "FATAL: another harbor run is alive; refusing to clean docker" >&2
         exit 1
     fi
