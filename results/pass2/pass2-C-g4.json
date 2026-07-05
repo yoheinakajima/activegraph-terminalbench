@@ -1,0 +1,69 @@
+{
+  "label": "C",
+  "job_dirs": [
+    "runs/pass2-C-g4"
+  ],
+  "n_trials": 3,
+  "trials": [
+    {
+      "task": "pytorch-model-recovery",
+      "trial": "pytorch-model-recovery__dG2X2wZ",
+      "started_at": "2026-07-05T23:05:47.874232Z",
+      "reward": 1.0,
+      "exception": null,
+      "n_input_tokens": 63887,
+      "n_cache_tokens": 0,
+      "n_output_tokens": 8434,
+      "finish_reason": "task_finished",
+      "steps": 12,
+      "tokens_in": 63887,
+      "tokens_in_uncached": 63887,
+      "tokens_cache_read": 0,
+      "tokens_cache_creation": 0,
+      "cache_hit_rate": 0.0,
+      "context_version": "v2",
+      "tokens_out": 8434,
+      "wall_time_sec": 172.373
+    },
+    {
+      "task": "pytorch-model-recovery",
+      "trial": "pytorch-model-recovery__mrgN5Cc",
+      "started_at": "2026-07-05T23:14:44.340233Z",
+      "reward": 1.0,
+      "exception": null,
+      "n_input_tokens": 42988,
+      "n_cache_tokens": 0,
+      "n_output_tokens": 4228,
+      "finish_reason": "task_finished",
+      "steps": 12,
+      "tokens_in": 42988,
+      "tokens_in_uncached": 42988,
+      "tokens_cache_read": 0,
+      "tokens_cache_creation": 0,
+      "cache_hit_rate": 0.0,
+      "context_version": "v2",
+      "tokens_out": 4228,
+      "wall_time_sec": 94.809
+    },
+    {
+      "task": "pytorch-model-recovery",
+      "trial": "pytorch-model-recovery__zm5C4uk",
+      "started_at": "2026-07-05T23:12:17.923024Z",
+      "reward": 1.0,
+      "exception": null,
+      "n_input_tokens": 32670,
+      "n_cache_tokens": 0,
+      "n_output_tokens": 3437,
+      "finish_reason": "task_finished",
+      "steps": 8,
+      "tokens_in": 32670,
+      "tokens_in_uncached": 32670,
+      "tokens_cache_read": 0,
+      "tokens_cache_creation": 0,
+      "cache_hit_rate": 0.0,
+      "context_version": "v2",
+      "tokens_out": 3437,
+      "wall_time_sec": 79.128
+    }
+  ]
+}
