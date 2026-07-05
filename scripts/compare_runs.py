@@ -52,16 +52,25 @@ def load_config_trials(paths: list[Path]) -> list[dict]:
     return trials
 
 
-def build_matrix(trials: list[dict]) -> tuple[dict[str, list[bool]], int, list[str]]:
-    """task -> ordered pass/fail cells, padded to the widest run count."""
+def build_matrix(
+    trials: list[dict], max_runs: int | None = None
+) -> tuple[dict[str, list[bool]], int, list[str]]:
+    """task -> ordered pass/fail cells, padded to the widest run count.
+
+    max_runs caps the basis: extra trials beyond it (e.g. a task that got a
+    4th trial from a re-run chunk) are dropped so one over-sampled task does
+    not force failure-padding onto every other task."""
     problems: list[str] = []
     by_task: dict[str, list[dict]] = {}
     for trial in trials:
         by_task.setdefault(trial["task"], []).append(trial)
     n_runs = max((len(v) for v in by_task.values()), default=0)
+    if max_runs is not None:
+        n_runs = min(n_runs, max_runs)
     matrix: dict[str, list[bool]] = {}
     for task, rows in sorted(by_task.items()):
         rows.sort(key=lambda r: (r.get("started_at") or "", r["trial"]))
+        rows = rows[:n_runs] if max_runs is not None else rows
         cells = [
             r["reward"] is not None and r["reward"] >= PASS_THRESHOLD for r in rows
         ]
@@ -199,6 +208,8 @@ def main(argv: list[str]) -> None:
     parser.add_argument("--diff", action="append", default=[], metavar="LEFT:RIGHT")
     parser.add_argument("--out-dir", type=Path, required=True)
     parser.add_argument("--metrics-out", type=Path, required=True)
+    parser.add_argument("--max-runs", type=int, default=None,
+                        help="cap per-task trials at this many runs")
     parser.add_argument("--excluded", type=Path, default=EXCLUDED_TASKS_PATH)
     args = parser.parse_args(argv)
 
@@ -214,7 +225,7 @@ def main(argv: list[str]) -> None:
         if not files:
             raise SystemExit(f"bad --config spec: {spec!r}")
         trials = load_config_trials([Path(f) for f in files.split(",")])
-        matrix, n_runs, problems = build_matrix(trials)
+        matrix, n_runs, problems = build_matrix(trials, args.max_runs)
         matrices[label] = matrix
         clean = restrict(matrix, set(matrix) - excluded)
         report["configs"][label] = {

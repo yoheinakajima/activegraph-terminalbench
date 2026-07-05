@@ -1,0 +1,87 @@
+task,C_passes,C_trials,B_passes,B_trials,category
+adaptive-rejection-sampler,0,3,1,3,B_only (flaky:B)
+bn-fit-modify,3,3,2,3,both (flaky:B)
+break-filter-js-from-html,0,3,3,3,B_only
+build-cython-ext,0,3,0,3,neither
+build-pmars,0,3,0,3,neither
+build-pov-ray,0,3,0,3,neither
+caffe-cifar-10,0,3,0,3,neither
+cancel-async-tasks,1,3,0,3,C_only (flaky:C)
+chess-best-move,0,3,0,3,neither
+circuit-fibsqrt,0,3,1,3,B_only (flaky:B)
+cobol-modernization,0,3,3,3,B_only
+code-from-image,1,3,0,3,C_only (flaky:C)
+compile-compcert,0,3,3,3,B_only
+configure-git-webserver,2,3,3,3,both (flaky:C)
+constraints-scheduling,3,3,3,3,both
+count-dataset-tokens,0,3,0,3,neither
+crack-7z-hash,2,3,1,3,both (flaky:C+B)
+custom-memory-heap-crash,2,3,3,3,both (flaky:C)
+db-wal-recovery,0,3,0,3,neither
+distribution-search,3,3,1,3,both (flaky:B)
+dna-assembly,0,3,0,3,neither
+dna-insert,0,3,0,3,neither
+extract-elf,0,3,1,3,B_only (flaky:B)
+extract-moves-from-video,0,3,0,3,neither
+feal-differential-cryptanalysis,0,3,0,0,neither
+feal-linear-cryptanalysis,0,3,0,0,neither
+filter-js-from-html,0,3,0,0,neither
+financial-document-processor,0,3,0,0,neither
+fix-code-vulnerability,2,3,0,0,C_only (flaky:C)
+fix-git,3,3,0,0,C_only
+fix-ocaml-gc,1,3,0,0,C_only (flaky:C)
+gcode-to-text,0,3,0,0,neither
+git-leak-recovery,3,3,0,0,C_only
+git-multibranch,1,3,0,0,C_only (flaky:C)
+gpt2-codegolf,0,3,0,0,neither
+headless-terminal,0,3,0,0,neither
+install-windows-3.11,1,3,0,0,C_only (flaky:C)
+kv-store-grpc,0,3,0,0,neither
+large-scale-text-editing,1,3,0,0,C_only (flaky:C)
+largest-eigenval,3,3,0,0,C_only
+llm-inference-batching-scheduler,1,3,0,0,C_only (flaky:C)
+log-summary-date-ranges,3,3,0,0,C_only
+mailman,0,3,0,0,neither
+make-doom-for-mips,0,3,0,0,neither
+make-mips-interpreter,0,3,0,0,neither
+mcmc-sampling-stan,0,3,0,0,neither
+merge-diff-arc-agi-task,1,3,0,0,C_only (flaky:C)
+model-extraction-relu-logits,0,3,0,0,neither
+modernize-scientific-stack,3,3,0,0,C_only
+multi-source-data-merger,3,3,0,0,C_only
+nginx-request-logging,0,3,0,0,neither
+openssl-selfsigned-cert,3,3,0,0,C_only
+overfull-hbox,0,3,0,0,neither
+password-recovery,1,3,0,0,C_only (flaky:C)
+path-tracing,0,3,0,0,neither
+path-tracing-reverse,0,3,0,0,neither
+polyglot-c-py,0,3,0,0,neither
+polyglot-rust-c,0,3,0,0,neither
+portfolio-optimization,0,3,0,0,neither
+protein-assembly,0,3,0,0,neither
+prove-plus-comm,3,3,0,0,C_only
+pypi-server,3,3,0,0,C_only
+pytorch-model-cli,0,3,0,0,neither
+pytorch-model-recovery,3,3,0,0,C_only
+qemu-alpine-ssh,0,3,0,0,neither
+qemu-startup,2,3,0,0,C_only (flaky:C)
+query-optimize,2,3,0,0,C_only (flaky:C)
+raman-fitting,0,3,0,0,neither
+regex-chess,0,3,0,0,neither
+regex-log,2,3,0,0,C_only (flaky:C)
+reshard-c4-data,0,3,0,0,neither
+rstan-to-pystan,0,3,0,0,neither
+sam-cell-seg,0,3,0,0,neither
+sanitize-git-repo,1,3,0,0,C_only (flaky:C)
+schemelike-metacircular-eval,0,3,0,0,neither
+sparql-university,0,3,0,0,neither
+sqlite-db-truncate,2,3,0,0,C_only (flaky:C)
+sqlite-with-gcov,2,3,0,0,C_only (flaky:C)
+torch-pipeline-parallelism,0,3,0,0,neither
+torch-tensor-parallelism,0,3,0,0,neither
+train-fasttext,0,3,0,0,neither
+tune-mjcf,0,3,0,0,neither
+video-processing,0,3,0,0,neither
+vulnerable-secret,3,3,0,0,C_only
+winning-avg-corewars,0,3,0,0,neither
+write-compressor,0,3,0,0,neither
