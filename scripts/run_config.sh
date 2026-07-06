@@ -53,7 +53,8 @@ for chunk in "$@"; do
         --registry-path .cache/registry.json \
         --extra-docker-compose "$OVERLAY"
     uv run python scripts/collect_chunk.py "runs/$name" --out "$out" --label "$LABEL"
-    git add "$out"
+    bash scripts/archive_events.sh "runs/$name"
+    git add "$out" "results/events/${name}-events.tar.gz"
     git commit -q -m "pass2: collect ${name}"
     git push -q origin HEAD || git push origin HEAD
     # Keep full trial evidence (event logs, verifier output) compressed on
