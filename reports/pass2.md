@@ -114,13 +114,55 @@ the committed summaries do establish:
   declared the task finished immediately). That flip looks like a v1
   misfire on this task, not a v2 retrieval success.
 
-The bimodal signature (fast solves or churn-to-cap, with elevated
-output tokens during churn) is consistent with the dropped-own-actions
-hypothesis and inconsistent with a simple slower-per-step story, but the
-hypothesis remains circumstantial: per the taxonomy, all five regressions
-classify as (b) budget exhaustion at the verified level, with (a) as the
-plausible unverified driver. Pass 3 must commit or release the raw event
-stores so this question is answerable next time.
+**Instrumented reproduction (2026-07-06).** Since the original transcripts
+were unrecoverable, three fresh C jobs ran with full event capture, and
+the event stores are committed under `results/events/` (persistence
+policy fixed: `run_config.sh` now archives every job's event stores in
+the same commit as the chunk artifact). Cost ~$8. Results:
+
+- *cobol-modernization, spiral reproduced 3/3* (`repro-C-cobol`): every
+  trial hit the 60-step cap again (2 of 3 passed at the cap this time;
+  the verifier scores end state, so churn is not always fatal). The
+  failed trial gives the object-level walkthrough the original run
+  couldn't. At step 22 the agent wrote `/app/program.py` guessing
+  40-byte account records; step 24 ran it and got a traceback in
+  `parse_account`. At step 31, with `V2_TAIL_EXCHANGES = 5`, both its
+  own file content and that traceback had left the verbatim window,
+  surviving only as ≤140-char digest lines; the "active error" object
+  retrieval surfaced was the irrelevant step-25 `hexdump: command not
+  found` (most-recent-error heuristic), and the whole context weighed
+  2,145 tokens across 12 messages (`context_built`, step 31,
+  `n_digest_steps: 26`). The model's recorded reasoning at that turn:
+  "Let me now create the correct Python program with these exact record
+  sizes" — it re-derived the record layout from the COBOL source over
+  steps 27–30 and rewrote the file from scratch instead of patching
+  line 90, then repeated the cycle again at step 47 (three full
+  rewrites, seven backup-restores, the same COBOL paragraphs re-read
+  twice). A's v1 keeps a 20-exchange verbatim tail: at the same step 31
+  it would still have contained the full program text and traceback,
+  and A's original trials finished in 38–46 steps with no rewrite.
+  Verdict: (a) confirmed as the driver, with (b) as the resulting
+  failure mode.
+- *portfolio-optimization, did NOT reproduce* (`repro-C-portfolio`):
+  3/3 clean solves in 12–14 steps. The original three zeros there look
+  like run-level variance, not a deterministic mechanism: (c).
+- *query-optimize A-side misfire reproduced 2/2* (`repro-A-qopt`): the
+  event logs show zero commands executed; the model wrote the full SQL
+  solution inside its `reasoning` field on the first turn, claimed the
+  file was "successfully created and verified", and returned
+  `done: true`. One trial hit the 4096-token output cap first, parse
+  errored, then "finished" on turn 2. A loop weakness (nothing enforces
+  a verification command before `done`), unrelated to retrieval; the
+  C-vs-A flip on this task is not evidence for v2.
+
+Net classification for the five regressions: cobol-modernization is
+(a) verified by reproduction; compile-compcert, mailman, and
+mcmc-sampling-stan are (b) at the summary level (transcripts lost, not
+re-run); portfolio-optimization is (c) variance. The reproduction also
+recalibrates the "reliably solved to zero" framing: two of the six
+flips (portfolio, query-optimize) are variance or config-agnostic
+misfires, so the durable v2 signal is the config-wide cap-rate gap and
+the cobol-style rewrite spiral, not the per-task flip count.
 
 **4. v2's token economy is real but doesn't survive contact with cache
 pricing.** C spends 524k tokens per solve to A's 816k (36% less), and its
