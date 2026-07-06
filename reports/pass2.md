@@ -83,12 +83,44 @@ points solid versus A on the identical 82-task basis.** The regression is
 concentrated, not diffuse: five tasks that A solves in ≥2 of 3 trials go
 to zero under C (`cobol-modernization`, `compile-compcert`, `mailman`,
 `mcmc-sampling-stan`, `portfolio-optimization`), against a single opposite
-flip (`query-optimize`). A plausible common thread — unverified at the
-transcript level — is that these are long, stateful tasks where the agent
-needs its own earlier actions verbatim, which is what the retrieved-context
-window compresses away; confirming that requires reading the archived
-trial transcripts in `runs/archives/`.
+flip (`query-optimize`).
 Full per-task table: `reports/pass2_artifacts/diff_C_vs_A.csv`.
+
+**Mechanism, at the depth the committed evidence supports.** The raw
+trial transcripts (per-trial event stores with the `context_built` audit
+trail) were never committed — the chunked-collection design pushed only
+compact per-trial summaries, and the containers holding `runs/` were
+reclaimed — so the object-level question "which retrieved context dropped
+which earlier action at which turn" is unanswerable for this run. What
+the committed summaries do establish:
+
+- *The proximate failure mode of all five regressions is budget
+  exhaustion, verified.* 13 of C's 15 trials on the five tasks ended
+  `budget_exhausted` (60-step cap or 840 s wall clock) versus 3 of 15
+  for A — and A passed anyway in those 3 (the verifier scores end state,
+  so a solved-then-capped trial still passes). C never reached a passing
+  state before the cap. Example: `cobol-modernization`, which A finishes
+  in 38–46 steps with ~5k output tokens, runs C to the 60-step cap in
+  all three trials while emitting 2–3× the output tokens.
+- *The pattern is config-wide and bimodal.* C hit budget exhaustion in
+  31% of all 258 trials versus 14% for A. Yet when C solves, it solves
+  in fewer steps than A (mean 18.5 vs 28.7). v2 either finds the path
+  quickly on its small context or spirals to the cap; it rarely grinds
+  out a slow win the way A does (A solved 5 trials that hit the cap,
+  C solved 2).
+- *The C-side win is weak evidence for retrieval.* On `query-optimize`
+  C solved 2 of 3 in 11–13 steps, but A's failures there are degenerate:
+  two trials ended after a single step on 447 input tokens (the model
+  declared the task finished immediately). That flip looks like a v1
+  misfire on this task, not a v2 retrieval success.
+
+The bimodal signature (fast solves or churn-to-cap, with elevated
+output tokens during churn) is consistent with the dropped-own-actions
+hypothesis and inconsistent with a simple slower-per-step story, but the
+hypothesis remains circumstantial: per the taxonomy, all five regressions
+classify as (b) budget exhaustion at the verified level, with (a) as the
+plausible unverified driver. Pass 3 must commit or release the raw event
+stores so this question is answerable next time.
 
 **4. v2's token economy is real but doesn't survive contact with cache
 pricing.** C spends 524k tokens per solve to A's 816k (36% less), and its
