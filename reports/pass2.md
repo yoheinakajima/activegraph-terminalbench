@@ -117,7 +117,7 @@ the committed summaries do establish:
 **Instrumented reproduction (2026-07-06).** Since the original transcripts
 were unrecoverable, three fresh C jobs ran with full event capture, and
 the event stores are committed under `results/events/` (persistence
-policy fixed: `run_config.sh` now archives every job's event stores in
+policy fixed: `scripts/run_config.sh` now archives every job's event stores in
 the same commit as the chunk artifact). Cost ~$8. Results:
 
 - *cobol-modernization, spiral reproduced 3/3* (`repro-C-cobol`): every

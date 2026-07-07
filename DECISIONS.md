@@ -280,3 +280,17 @@ Still NOT verified, and why:
    containers only (tls-overlay-astral-tmux.yaml); with tmux present its
    installer no-ops. Verified with a one-task probe: reward 1.0, 82%
    cache hit rate.
+8. **Evidence persistence policy (2026-07-06, added after the pass-2 raw
+   transcripts were lost to container reclaims):** evidence cited by a
+   published claim lives in the repo, not in ephemeral storage and not
+   in GitHub releases. Concretely: every harbor job's per-trial event
+   stores (event_log.json with the context_built audit trail,
+   summary.json, config.json, trial.log) are compressed by
+   scripts/archive_events.sh into results/events/<job>-events.tar.gz
+   and committed in the same push as the job's chunk artifact
+   (scripts/run_config.sh does this automatically). The three
+   instrumented-reproduction tarballs backing the part-1 blog post's
+   mechanism section are the first artifacts kept under this policy,
+   deliberately in git despite being binary: they are small (253 KB
+   total) and the claims they support are public. Summaries alone
+   proved insufficient exactly once, and once was enough.
