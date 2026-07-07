@@ -44,10 +44,20 @@ class ScriptedLLM:
         text = json.dumps(turn)
         return LLMResult(
             text=text,
-            input_tokens=sum(len(m["content"]) // 4 for m in messages),
+            input_tokens=sum(len(_content_text(m)) // 4 for m in messages),
             output_tokens=len(text) // 4,
+            cache_creation_input_tokens=0,
+            cache_read_input_tokens=0,
             latency_sec=0.0,
             model=self.model,
             retries=0,
             stop_reason="end_turn",
         )
+
+
+def _content_text(message: dict) -> str:
+    """Message content is a plain string or a list of text blocks."""
+    content = message["content"]
+    if isinstance(content, str):
+        return content
+    return "".join(block.get("text", "") for block in content)

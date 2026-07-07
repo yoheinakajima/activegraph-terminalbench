@@ -6,4 +6,4 @@ a per-trial ActiveGraph store, and the graph is the deterministic projection
 of the run.
 """
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"

@@ -1,0 +1,136 @@
+{
+  "configs": {
+    "A": {
+      "full_basis": {
+        "n_tasks": 24,
+        "n_runs": 3,
+        "solid": 0.25,
+        "worst_of": 0.3333,
+        "average": 0.375,
+        "best_of": 0.4167,
+        "ceiling": 0.5417,
+        "per_run_pass_rates": [
+          0.4167,
+          0.3333,
+          0.375
+        ]
+      },
+      "clean_basis": {
+        "n_tasks": 22,
+        "n_runs": 3,
+        "solid": 0.2727,
+        "worst_of": 0.3636,
+        "average": 0.4091,
+        "best_of": 0.4545,
+        "ceiling": 0.5909,
+        "per_run_pass_rates": [
+          0.4545,
+          0.3636,
+          0.4091
+        ]
+      },
+      "tokens_in": 19667818,
+      "tokens_out": 742001,
+      "tokens_cache_read": 6263176,
+      "cache_hit_rate": 0.3184,
+      "cost_usd": 53.74,
+      "cost_is_lower_bound": false,
+      "n_trials": 72,
+      "n_solved_trials": 27,
+      "tokens_per_solve": 728438,
+      "problems": []
+    },
+    "B": {
+      "full_basis": {
+        "n_tasks": 24,
+        "n_runs": 3,
+        "solid": 0.25,
+        "worst_of": 0.25,
+        "average": 0.3472,
+        "best_of": 0.4167,
+        "ceiling": 0.5,
+        "per_run_pass_rates": [
+          0.375,
+          0.4167,
+          0.25
+        ]
+      },
+      "clean_basis": {
+        "n_tasks": 22,
+        "n_runs": 3,
+        "solid": 0.2727,
+        "worst_of": 0.2727,
+        "average": 0.3788,
+        "best_of": 0.4545,
+        "ceiling": 0.5455,
+        "per_run_pass_rates": [
+          0.4091,
+          0.4545,
+          0.2727
+        ]
+      },
+      "tokens_in": 652047050,
+      "tokens_out": 1403944,
+      "tokens_cache_read": 648882273,
+      "cache_hit_rate": 0.9951,
+      "cost_usd": 225.22,
+      "cost_is_lower_bound": true,
+      "n_trials": 72,
+      "n_solved_trials": 25,
+      "tokens_per_solve": 26081882,
+      "problems": []
+    },
+    "C": {
+      "full_basis": {
+        "n_tasks": 24,
+        "n_runs": 3,
+        "solid": 0.125,
+        "worst_of": 0.2083,
+        "average": 0.2361,
+        "best_of": 0.25,
+        "ceiling": 0.3333,
+        "per_run_pass_rates": [
+          0.25,
+          0.2083,
+          0.25
+        ]
+      },
+      "clean_basis": {
+        "n_tasks": 22,
+        "n_runs": 3,
+        "solid": 0.1364,
+        "worst_of": 0.2273,
+        "average": 0.2576,
+        "best_of": 0.2727,
+        "ceiling": 0.3636,
+        "per_run_pass_rates": [
+          0.2727,
+          0.2273,
+          0.2727
+        ]
+      },
+      "tokens_in": 12003347,
+      "tokens_out": 859542,
+      "tokens_cache_read": 0,
+      "cache_hit_rate": 0.0,
+      "cost_usd": 48.9,
+      "cost_is_lower_bound": false,
+      "n_trials": 72,
+      "n_solved_trials": 17,
+      "tokens_per_solve": 706079,
+      "problems": [
+        "caffe-cifar-10__3vnVaNr: no reward (VerifierTimeoutError); counted as failure",
+        "caffe-cifar-10__B7tqi4J: no reward (VerifierTimeoutError); counted as failure"
+      ]
+    }
+  },
+  "excluded_tasks": [
+    "build-pmars",
+    "count-dataset-tokens",
+    "hf-model-inference",
+    "make-doom-for-mips",
+    "mteb-leaderboard",
+    "mteb-retrieve",
+    "reshard-c4-data"
+  ]
+}

@@ -2,7 +2,14 @@
 
 A custom [Harbor](https://github.com/laude-institute/harbor) agent for Terminal-Bench 2.0 that uses [ActiveGraph](https://pypi.org/project/activegraph/) as its memory and logging substrate. The agent is a plain ReAct loop driving the task container through `environment.exec()`; the twist is that every step of every trial (model reasoning, command, output, error, timing, tokens) is appended as an event to a per-trial ActiveGraph store, so the run IS the event log and the typed graph (Task, Step, Command, Observation, Error) is its deterministic projection. Same base model, different harness, and every run is fully inspectable after the fact.
 
-The one seam that matters: everything the model sees each turn comes from a single function, `build_context()` in `src/activegraph_harness/context.py`. Version 1 is deliberately dumb (system prompt plus the verbatim tail of the recent transcript, reconstructed from the event log). Version 2 will swap in graph-based retrieval (the active error object, the files it relates to, prior attempts on the current subgoal) behind that one function boundary. The loop never knows which version it is talking to, so the swap is a one-function change.
+The one seam that matters: everything the model sees each turn comes from a single function, `build_context()` in `src/activegraph_harness/context.py`. Version 1 is deliberately dumb (system prompt plus the verbatim tail of the recent transcript, reconstructed from the event log), optionally with prompt caching (`--ak enable_cache=true`). Version 2 (`--ak context_version=v2`) swaps in graph-based retrieval behind that one function boundary: the active error object, files touched, prior attempts on the current subgoal, a one-line digest of older steps, and a short verbatim tail. The loop never knows which version it is talking to.
+
+## Results so far
+
+- **Pass 1** (Sonnet 4.6, k=1, all 89 tasks): [reports/pass1.md](reports/pass1.md). Headline: 38.2% canonical, 43.9% on the clean 82-task subset.
+- **Pass 2** (Sonnet 4.5, k=3, three-config matrix: v1+cache, terminus-2 control, v2 retrieval): [reports/pass2.md](reports/pass2.md). Headline: v1+cache matches the control; v2 retrieval loses by 5 points, mechanism verified by instrumented reproduction (event stores in `results/events/`).
+- **Write-up**: [blog/2026-07-terminal-bench-part-1.md](blog/2026-07-terminal-bench-part-1.md).
+- **Pass 3 (planned)**: native x86 VM with open egress, uniform 3,600s timeouts, k=5, control on all 89 tasks, v3 hybrid context with graph-native stall detection.
 
 ## Prerequisites
 
@@ -59,6 +66,8 @@ Useful agent knobs (all optional, passed as `--ak key=value`):
 - `--ak max_steps=60`: maximum ReAct turns per trial.
 - `--ak command_timeout_sec=180`: per-command timeout inside the container.
 - `--ak wall_clock_budget_sec=840`: soft wall clock budget. The default matches the most common TB2 agent timeout (900s) minus headroom; raise it together with `--agent-timeout-multiplier` for long tasks.
+- `--ak enable_cache=true`: prompt caching for the v1 transcript context (stable prefix breakpoints; the cache breakpoint is dropped once the transcript window starts sliding, see `context.py` for why).
+- `--ak context_version=v2`: graph-retrieval context instead of the verbatim transcript.
 
 ## Full run (the expensive step)
 
@@ -117,6 +126,15 @@ src/activegraph_harness/
 scripts/
   wolfbench_metrics.py   task-by-run matrix -> the five WolfBench numbers
   smoke_test.sh          oracle smoke + 2-task agent smoke
+  run_config.sh          chunked matrix runner: per-chunk collect + commit + push
+  collect_chunk.py       harbor job dir -> compact committed chunk artifact
+  archive_events.sh      per-job event stores -> results/events/*.tar.gz (same commit)
+  compare_runs.py        chunk artifacts -> five metrics, cost, per-task diffs
+  recover_and_resume.sh  one-command recovery after an ephemeral-container reset
+  rebuild_sandbox.sh     sandbox bootstrap (uv, registry snapshot, TLS overlays)
+reports/                 pass1.md, pass2.md + committed metrics and matrices
+results/                 per-chunk artifacts, event-store tarballs, exclusions
+blog/                    the write-up series
 ```
 
 See `DECISIONS.md` for every place this implementation diverges from the original spec and what was actually verified where.

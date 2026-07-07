@@ -1,0 +1,8 @@
+sanitize-git-repo
+schemelike-metacircular-eval
+sparql-university
+sqlite-db-truncate
+sqlite-with-gcov
+torch-pipeline-parallelism
+torch-tensor-parallelism
+train-fasttext

@@ -1,0 +1,21 @@
+{
+  "solid": 0.3788,
+  "worst_of": 0.3788,
+  "average": 0.3788,
+  "best_of": 0.3788,
+  "ceiling": 0.3788,
+  "spread": 0.0,
+  "n_tasks": 66,
+  "n_runs": 1,
+  "per_run_pass_rates": [
+    0.3788
+  ],
+  "incomplete_trials": [
+    "custom-memory-heap-crash__nJxeooj: no verifier reward (RuntimeError); counted as failure",
+    "filter-js-from-html__Fso4T7d: no verifier reward (VerifierTimeoutError); counted as failure",
+    "hf-model-inference__HcFidMT: no verifier reward (RuntimeError); counted as failure",
+    "model-extraction-relu-logits__DfH4Whq: no verifier reward (AgentTimeoutError); counted as failure",
+    "mteb-leaderboard__sS3hmAy: no verifier reward (RuntimeError); counted as failure",
+    "mteb-retrieve__hDGe9ao: no verifier reward (RuntimeError); counted as failure"
+  ]
+}

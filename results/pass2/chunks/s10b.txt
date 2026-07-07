@@ -1,0 +1,4 @@
+sqlite-with-gcov
+torch-pipeline-parallelism
+torch-tensor-parallelism
+train-fasttext

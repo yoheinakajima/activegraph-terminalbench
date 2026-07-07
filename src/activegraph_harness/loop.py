@@ -92,6 +92,8 @@ class TurnRecord:
     feedback_text: str
     input_tokens: int
     output_tokens: int
+    cache_creation_input_tokens: int
+    cache_read_input_tokens: int
     latency_sec: float
     command_wall_time_sec: float | None
 
@@ -104,6 +106,8 @@ class LoopResult:
     n_errors: int
     input_tokens: int
     output_tokens: int
+    cache_creation_input_tokens: int = 0
+    cache_read_input_tokens: int = 0
 
 
 def parse_response(text: str) -> dict[str, Any]:
@@ -149,8 +153,13 @@ async def run_loop(
     llm: ModelClient,
     budgets: Budgets,
     record_turn: Callable[[TurnRecord], None],
+    context_builder: Callable[..., list[dict]] = build_context,
 ) -> LoopResult:
     """Run the ReAct loop until done or budget exhaustion.
+
+    context_builder is the retrieval seam: any callable with
+    build_context's signature. The loop never knows which version it got;
+    the builder logs its own context_built audit event.
 
     Raises on unrecoverable errors (LLM failure after retries, store
     failure); the caller logs and exports in its finally block. Command
@@ -163,6 +172,8 @@ async def run_loop(
     n_errors = 0
     total_input_tokens = 0
     total_output_tokens = 0
+    total_cache_creation_tokens = 0
+    total_cache_read_tokens = 0
     consecutive_parse_failures = 0
     step = 0
 
@@ -182,10 +193,12 @@ async def run_loop(
                 n_errors=n_errors,
                 input_tokens=total_input_tokens,
                 output_tokens=total_output_tokens,
+                cache_creation_input_tokens=total_cache_creation_tokens,
+                cache_read_input_tokens=total_cache_read_tokens,
             )
 
         # 1. Assemble context (the one retrieval seam).
-        messages = build_context(log, instruction, step, budgets)
+        messages = context_builder(log, instruction, step, budgets)
 
         # 2. Call the model. LLM retries are logged from inside the client.
         def log_llm_event(event_type: str, payload: dict[str, Any], _step=step) -> None:
@@ -206,6 +219,8 @@ async def run_loop(
 
         total_input_tokens += result.input_tokens
         total_output_tokens += result.output_tokens
+        total_cache_creation_tokens += result.cache_creation_input_tokens
+        total_cache_read_tokens += result.cache_read_input_tokens
 
         # 3. Parse defensively.
         parsed: dict[str, Any] | None = None
@@ -230,6 +245,8 @@ async def run_loop(
                 "raw_response": result.text,
                 "input_tokens": result.input_tokens,
                 "output_tokens": result.output_tokens,
+                "cache_creation_input_tokens": result.cache_creation_input_tokens,
+                "cache_read_input_tokens": result.cache_read_input_tokens,
                 "latency_sec": result.latency_sec,
                 "retries": result.retries,
                 "stop_reason": result.stop_reason,
@@ -279,6 +296,8 @@ async def run_loop(
                     feedback_text=feedback,
                     input_tokens=result.input_tokens,
                     output_tokens=result.output_tokens,
+                    cache_creation_input_tokens=result.cache_creation_input_tokens,
+                    cache_read_input_tokens=result.cache_read_input_tokens,
                     latency_sec=result.latency_sec,
                     command_wall_time_sec=None,
                 )
@@ -309,6 +328,8 @@ async def run_loop(
                     feedback_text="",
                     input_tokens=result.input_tokens,
                     output_tokens=result.output_tokens,
+                    cache_creation_input_tokens=result.cache_creation_input_tokens,
+                    cache_read_input_tokens=result.cache_read_input_tokens,
                     latency_sec=result.latency_sec,
                     command_wall_time_sec=None,
                 )
@@ -320,6 +341,8 @@ async def run_loop(
                 n_errors=n_errors,
                 input_tokens=total_input_tokens,
                 output_tokens=total_output_tokens,
+                cache_creation_input_tokens=total_cache_creation_tokens,
+                cache_read_input_tokens=total_cache_read_tokens,
             )
 
         # 5. No command and not done: no-op turn, tell the model.
@@ -346,6 +369,8 @@ async def run_loop(
                     feedback_text=feedback,
                     input_tokens=result.input_tokens,
                     output_tokens=result.output_tokens,
+                    cache_creation_input_tokens=result.cache_creation_input_tokens,
+                    cache_read_input_tokens=result.cache_read_input_tokens,
                     latency_sec=result.latency_sec,
                     command_wall_time_sec=None,
                 )
@@ -356,6 +381,9 @@ async def run_loop(
         # 6. Execute the command in the task container.
         command_object_id = events.add_command_object(
             log, step_object_id, command, budgets.command_timeout_sec
+        )
+        events.add_file_objects(
+            log, command_object_id, events.extract_file_paths(command)
         )
         command_started = time.monotonic()
         exec_error: str | None = None
@@ -452,6 +480,8 @@ async def run_loop(
                 feedback_text=feedback,
                 input_tokens=result.input_tokens,
                 output_tokens=result.output_tokens,
+                cache_creation_input_tokens=result.cache_creation_input_tokens,
+                cache_read_input_tokens=result.cache_read_input_tokens,
                 latency_sec=result.latency_sec,
                 command_wall_time_sec=command_wall_time,
             )

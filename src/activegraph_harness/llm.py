@@ -39,10 +39,22 @@ class LLMResult:
     text: str
     input_tokens: int
     output_tokens: int
+    cache_creation_input_tokens: int
+    cache_read_input_tokens: int
     latency_sec: float
     model: str
     retries: int
     stop_reason: str | None
+
+    @property
+    def total_input_tokens(self) -> int:
+        """All prompt tokens the model actually saw. The API reports
+        input_tokens as only the tokens after the last cache breakpoint."""
+        return (
+            self.input_tokens
+            + self.cache_creation_input_tokens
+            + self.cache_read_input_tokens
+        )
 
 
 def resolve_model(model_name: str | None) -> str:
@@ -62,17 +74,72 @@ def resolve_model(model_name: str | None) -> str:
     return model
 
 
-def split_system(messages: list[dict[str, str]]) -> tuple[str, list[dict[str, str]]]:
+def split_system(messages: list[dict[str, Any]]) -> tuple[Any, list[dict[str, Any]]]:
     """Separate the leading system message from the chat turns."""
     if messages and messages[0]["role"] == "system":
         return messages[0]["content"], messages[1:]
     return "", messages
 
 
+def apply_cache_control(system: Any, turns: list[dict[str, Any]]) -> tuple[Any, list[dict[str, Any]]]:
+    """Translate build_context's cache marks into API cache breakpoints.
+
+    Breakpoint placement is decided by the context builder, which knows
+    which text is stable across turns; this function only translates:
+    1. The system prompt always gets a breakpoint (identical every turn).
+    2. Any content block carrying the harness-internal flag "cache": True
+       gets cache_control; the flag itself is stripped (the API rejects
+       unknown fields). Blocks without the flag stay uncached and must
+       hold all per-turn volatile text (budget countdown, retrieved slice).
+
+    v1 marks the final message's feedback block, so each turn reads the
+    whole prior transcript from cache and writes only the new tail. v2
+    marks only the stable prefix (the task instruction) and deliberately
+    leaves its small rebuilt-each-turn slice uncached.
+
+    The API allows at most 4 breakpoints per request; system takes one, so
+    a builder may mark at most 3 blocks. More than that is a bug and
+    raises. Blocks below the model's minimum cacheable prefix (1024 tokens
+    on Sonnet, 4096 on Haiku 4.5) are silently not cached by the API; both
+    usage counters just read 0. That is expected on small early turns.
+    """
+    system_blocks = [
+        {"type": "text", "text": system, "cache_control": {"type": "ephemeral"}}
+    ]
+    marked = 0
+    cached_turns = []
+    for turn in turns:
+        content = turn["content"]
+        if isinstance(content, str):
+            cached_turns.append(dict(turn))
+            continue
+        blocks = []
+        for block in content:
+            block = dict(block)
+            if block.pop("cache", False):
+                marked += 1
+                block["cache_control"] = {"type": "ephemeral"}
+            blocks.append(block)
+        cached_turns.append({**turn, "content": blocks})
+    if marked > 3:
+        raise LLMError(
+            f"context builder marked {marked} cache blocks; the API allows "
+            "4 breakpoints per request and the system prompt uses one"
+        )
+    return system_blocks, cached_turns
+
+
 class LLMClient:
-    def __init__(self, model_name: str | None = None, *, max_output_tokens: int = 4096):
+    def __init__(
+        self,
+        model_name: str | None = None,
+        *,
+        max_output_tokens: int = 4096,
+        enable_prompt_caching: bool = True,
+    ):
         self.model = resolve_model(model_name)
         self.max_output_tokens = max_output_tokens
+        self.enable_prompt_caching = enable_prompt_caching
         # Claude Code on the web reserves the ANTHROPIC_API_KEY name in its
         # environment settings (provider auth is host-managed there), so
         # accept ANTHROP_API_KEY as a fallback for sandbox runs.
@@ -93,6 +160,8 @@ class LLMClient:
         self, messages: list[dict[str, str]], *, log_event: LogEventFn
     ) -> LLMResult:
         system, turns = split_system(messages)
+        if self.enable_prompt_caching:
+            system, turns = apply_cache_control(system, turns)
         last_error: Exception | None = None
         for attempt in range(MAX_RETRIES + 1):
             started = time.monotonic()
@@ -135,6 +204,10 @@ class LLMClient:
                 text=text,
                 input_tokens=response.usage.input_tokens,
                 output_tokens=response.usage.output_tokens,
+                # None when the request had no cache_control breakpoints.
+                cache_creation_input_tokens=response.usage.cache_creation_input_tokens
+                or 0,
+                cache_read_input_tokens=response.usage.cache_read_input_tokens or 0,
                 latency_sec=round(latency, 3),
                 model=response.model,
                 retries=attempt,

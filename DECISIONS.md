@@ -134,26 +134,76 @@ Verified in this sandbox, end to end:
   export paths (`tests/test_loop.py`, against real activegraph, no mocks
   of the store).
 
-NOT verified here, and why:
+Verified in a second sandbox session (2026-07-03), with a real API key
+(`ANTHROP_API_KEY`):
 
-- **No real Anthropic API call was made.** This sandbox has no
-  `ANTHROPIC_API_KEY`. The haiku smoke test and the sonnet full run in the
-  README are written exactly as they should be typed on your Mac, but they
-  were not executed. The first thing to do after cloning is run smoke test
-  2 and read one `event_log.json` end to end.
+- **Real Anthropic API calls are now verified.** Smoke test 2 ran against
+  `claude-haiku-4-5` (2 tasks, then again with `-k 2`): per-turn
+  `input_tokens` / `output_tokens` / `latency_sec` in `event_log.json` are
+  real API usage numbers, `llm_retry` never fired (no 429s at
+  4-concurrent), and `events.sqlite`, `event_log.json`, `summary.json`,
+  `trajectory.json` were produced for every trial. `wolfbench_metrics.py`
+  output was re-checked cell for cell against Harbor's result.json rewards,
+  now including a live "sometimes" row (largest-eigenval flipped 1→0 on a
+  wall-clock speedup assertion).
+- **The full 89-task benchmark ran in this sandbox** with
+  `anthropic/claude-sonnet-4-6`, k=1, `--n-concurrent 4`, in 4 chunks with
+  `docker image prune` between them, plus one-at-a-time retries of 5 trials
+  whose Docker environments never started (image-extract races with a
+  concurrent prune, then ENOSPC on ~15GB torch/mteb images — sandbox disk,
+  not the harness; 2 of the 5 passed on retry). Canonical result: 34/89 =
+  38.2% pass (env errors counted as failures), 36/89 = 40.4% with the two
+  recovered env-failures. ~$109 of sonnet spend (29.5M in / 1.4M out
+  tokens), ~5h wall time. Per-task breakdown separating agent failures
+  from sandbox-infrastructure failures: `results/README.md`.
+- **The astral.sh blockage was worked around, and validated.** A local
+  HTTPS stand-in for astral.sh serves an install.sh backed by the uv 0.9.5
+  binaries repacked from the official PyPI wheels (gnu + musl), with a
+  self-signed CA, `extra_hosts: astral.sh:host-gateway`, and a combined CA
+  bundle in the compose overlay; a fully static curl is mounted at
+  `/usr/local/bin/curl` because apt mirrors are also blocked and most
+  verifiers `apt-get install curl` first (harmless failure — no `set -e` —
+  once curl exists). Validated by the oracle agent on
+  `openssl-selfsigned-cert`: reward 1.0. With this overlay every verifier
+  except huggingface-dependent ones could run.
+
+Still NOT verified, and why:
+
 - **Nothing was executed on macOS or Apple Silicon.** All Docker
   verification here is linux/amd64. The Rosetta guidance in the README is
   standard TB2 practice but was not exercised in this build.
-- **The full 89-task oracle run was not executed here** (sandbox network
-  policy blocks several verifier downloads, notably the uv installer from
-  astral.sh that most TB2 verifiers fetch; that restriction does not exist
-  on a normal network).
-- Sandbox-only adaptations that were used here and are NOT part of the
-  repo: a local `registry.json` with `--registry-path` (the hub registry
-  API was proxy-blocked; the README documents this as a troubleshooting
-  fallback), a Docker registry mirror, and an `--extra-docker-compose`
-  overlay mounting the proxy's CA bundle into task containers. None are
-  needed on a machine with normal egress.
+- **k>1 at full scale.** The full run is k=1 (a k=5 run would outlive this
+  container), so solid/ceiling/spread coincide at 89 tasks; the variance
+  machinery was demonstrated live only on the k=2 haiku smoke.
+- **Tasks needing huggingface.co or Debian apt mirrors** never got a fair
+  attempt (egress allowlist). They are counted as failures in the canonical
+  number and itemized in `results/README.md`.
+- Sandbox-only adaptations used here, NOT part of the repo and not needed
+  on a machine with normal egress: local `registry.json` with
+  `--registry-path`, a Docker registry mirror (`mirror.gcr.io`), and the
+  `--extra-docker-compose` overlay described above (proxy CA bundle +
+  astral.sh stand-in + static curl).
+
+- **Phase-1 checkpoint decision (superseded, see below):** A and C complete
+  the remaining 65 tasks at k=3; B (terminus-2 control) runs them at k=2.
+- **Revised checkpoint decision (final, approved):** B stops at the
+  checkpoint-24 entirely; the A-vs-B calibration rests on that identical
+  24-task k=3 basis. A and C complete all 89 tasks at k=3. Projected
+  pass-2 total ~$630-680, inside the approved band.
+  Rationale: phase-1 totals A 37.5% / B 34.7% / C 23.6% average; B cost
+  >=$225 for 24 tasks (two 12000s build-pov-ray trials alone ~$160 via
+  context-summarization loops), projecting the pass-2 total past the
+  approved band at k=3. B keeps k=3 on the checkpoint-24 already run.
+- **The sandbox reset twice more during pass 2** (disk snapshot rolled
+  back to pass-1 state; second reset also wiped dockerd config, .cache,
+  .venv). All chunk artifacts survived because the runner commits and
+  pushes each chunk. Everything ephemeral is now reconstructed by
+  scripts/rebuild_sandbox.sh (committed), validated after rebuild by a
+  free oracle probe on openssl-selfsigned-cert (reward 1.0). The rebuilt
+  stand-in matches the official uv installer contract (uv+uvx binaries,
+  ~/.local/bin/env shim) and the overlays now export
+  SSL_CERT_FILE/UV_NATIVE_TLS so uv/pip verify TLS through the sandbox
+  MITM.
 
 ## Known fragilities
 
@@ -168,3 +218,79 @@ NOT verified here, and why:
   syncs the whole `agent/` dir; a shared cross-trial store (for cross-run
   memory experiments) would be a schema change, not a refactor, thanks to
   ActiveGraph's per-run scoping.
+
+## Pass 2 decisions (2026-07-03, second session)
+
+1. **Budget status moved out of the system prompt.** Pass 1 rendered the
+   per-turn countdown inside the system block, which would have
+   invalidated the system cache on every request. It now arrives as an
+   uncached text block appended after the last cache breakpoint of the
+   final message (v1) or inline after the retrieved slice (v2). This is
+   the one model-visible divergence between pass 1 and Run A; the words
+   are identical, only the position changed.
+2. **Cache breakpoints are marked by the context builder,** as a
+   harness-internal "cache": True flag on content blocks, translated to
+   API cache_control by llm.apply_cache_control (which also always marks
+   the system prompt, and rejects more than 3 marked blocks since the API
+   caps breakpoints at 4). Placement is a retrieval concern: v1 marks the
+   final feedback block (read the whole transcript from cache, write only
+   the tail), v2 marks only the task instruction (the slice is rebuilt
+   every turn, and caching it would bill 1.25x for entries that can never
+   hit).
+3. **v1 stops paying for cache once its window slides.** Measured live
+   before the fix: after MAX_TAIL_EXCHANGES the omission counter changes
+   every turn, so every request rewrote ~11k cache tokens for zero reads.
+   Post-trim turns now carry no moving breakpoint and pay plain input
+   price. Smoke test on fix-code-vulnerability (haiku, 39 turns): 53.2%
+   cache hit rate, 0.53x effective input cost, no wasted writes.
+4. **The smoke assertion was adapted from the spec.** "cache reads from
+   turn 3 onward" holds only while the v1 window is stable; the committed
+   check (scripts/cache_smoke_check.py) asserts reads for turns 3 through
+   MAX_TAIL_EXCHANGES+1, near-zero cache writes after that, and effective
+   cost below uncached.
+5. **Schema additions for v2 (pack 0.2.0):** a `file` object type
+   (path) and a `touches` relation (command -> file). Paths are extracted
+   from command text by a deliberately loose heuristic
+   (events.extract_file_paths); a false positive costs one stale context
+   line. Pass 1 had no file tracking, and the v2 contract needs "files
+   touched so far". Also added the `context_built` event type: version,
+   message count, token estimate, and (v2) the retrieved object ids, per
+   turn. Emitted by the builders themselves so the loop stays ignorant of
+   the context version.
+6. **v2 is selected by agent kwarg** (--ak context_version=v2), mapped to
+   a context_builder callable passed into run_loop. The loop signature
+   grew one defaulted parameter; the loop body still calls whatever
+   builder it was handed.
+7. **Run-matrix infrastructure incidents, all documented as they
+   happened:** (a) the first Run A launch used pass-1-sized 24-task
+   chunks; harbor schedules k=3 breadth-first, so all 24 task images plus
+   ~11 GB of concurrent container writable layers must coexist, which
+   cannot fit this disk. Killed at $21.90 of spend (36 agent-side trials,
+   discarded for matrix cleanliness), rerun as 8-task chunks with the four
+   giant-image tasks as singletons (scripts/run_config.sh, chunk files
+   committed under results/pass2/chunks/). (b) One trial
+   (custom-memory-heap-crash, Run A s03) hung forever in harbor's
+   artifact-collection step after the agent finished: harbor idle at 0%
+   CPU, verifier never started, no timeout applies there. Killed and
+   replaced by a k=1 make-up trial of the same task (which passed); the
+   swap is recorded inside results/pass2/pass2-A-s03.json. (c) terminus-2
+   (Run B) installs tmux via apt or a source build, both egress-blocked,
+   so every trial died at setup. Fixed by mounting a static tmux 3.3a
+   (fetched from GitHub releases, reachable from containers) into B's
+   containers only (tls-overlay-astral-tmux.yaml); with tmux present its
+   installer no-ops. Verified with a one-task probe: reward 1.0, 82%
+   cache hit rate.
+8. **Evidence persistence policy (2026-07-06, added after the pass-2 raw
+   transcripts were lost to container reclaims):** evidence cited by a
+   published claim lives in the repo, not in ephemeral storage and not
+   in GitHub releases. Concretely: every harbor job's per-trial event
+   stores (event_log.json with the context_built audit trail,
+   summary.json, config.json, trial.log) are compressed by
+   scripts/archive_events.sh into results/events/<job>-events.tar.gz
+   and committed in the same push as the job's chunk artifact
+   (scripts/run_config.sh does this automatically). The three
+   instrumented-reproduction tarballs backing the part-1 blog post's
+   mechanism section are the first artifacts kept under this policy,
+   deliberately in git despite being binary: they are small (253 KB
+   total) and the claims they support are public. Summaries alone
+   proved insufficient exactly once, and once was enough.

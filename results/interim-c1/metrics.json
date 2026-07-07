@@ -1,0 +1,16 @@
+{
+  "solid": 0.3333,
+  "worst_of": 0.3333,
+  "average": 0.3333,
+  "best_of": 0.3333,
+  "ceiling": 0.3333,
+  "spread": 0.0,
+  "n_tasks": 24,
+  "n_runs": 1,
+  "per_run_pass_rates": [
+    0.3333
+  ],
+  "incomplete_trials": [
+    "custom-memory-heap-crash__nJxeooj: no verifier reward (RuntimeError); counted as failure"
+  ]
+}

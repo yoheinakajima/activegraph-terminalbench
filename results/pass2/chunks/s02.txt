@@ -1,0 +1,8 @@
+chess-best-move
+circuit-fibsqrt
+cobol-modernization
+code-from-image
+compile-compcert
+configure-git-webserver
+constraints-scheduling
+count-dataset-tokens

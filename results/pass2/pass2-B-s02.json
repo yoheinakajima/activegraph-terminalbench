@@ -1,0 +1,249 @@
+{
+  "label": "B",
+  "job_dirs": [
+    "runs/pass2-B-s02"
+  ],
+  "n_trials": 24,
+  "trials": [
+    {
+      "task": "chess-best-move",
+      "trial": "chess-best-move__LeGvaYY",
+      "started_at": "2026-07-03T21:17:33.082036Z",
+      "reward": 0.0,
+      "exception": null,
+      "n_input_tokens": 154039,
+      "n_cache_tokens": 133778,
+      "n_output_tokens": 8639
+    },
+    {
+      "task": "chess-best-move",
+      "trial": "chess-best-move__WocDRRM",
+      "started_at": "2026-07-03T21:33:31.619442Z",
+      "reward": 0.0,
+      "exception": null,
+      "n_input_tokens": 305719,
+      "n_cache_tokens": 274820,
+      "n_output_tokens": 14894
+    },
+    {
+      "task": "chess-best-move",
+      "trial": "chess-best-move__vwM6o8q",
+      "started_at": "2026-07-03T21:49:59.663358Z",
+      "reward": 0.0,
+      "exception": null,
+      "n_input_tokens": 2053348,
+      "n_cache_tokens": 1977026,
+      "n_output_tokens": 36131
+    },
+    {
+      "task": "circuit-fibsqrt",
+      "trial": "circuit-fibsqrt__FxgvzeA",
+      "started_at": "2026-07-03T21:17:33.111827Z",
+      "reward": 0.0,
+      "exception": null,
+      "n_input_tokens": 2958734,
+      "n_cache_tokens": 2868584,
+      "n_output_tokens": 56214
+    },
+    {
+      "task": "circuit-fibsqrt",
+      "trial": "circuit-fibsqrt__j8wd4GB",
+      "started_at": "2026-07-03T22:00:58.752351Z",
+      "reward": 0.0,
+      "exception": null,
+      "n_input_tokens": 3153445,
+      "n_cache_tokens": 3057806,
+      "n_output_tokens": 54591
+    },
+    {
+      "task": "circuit-fibsqrt",
+      "trial": "circuit-fibsqrt__rmdcEpN",
+      "started_at": "2026-07-03T21:38:07.345971Z",
+      "reward": 1.0,
+      "exception": null,
+      "n_input_tokens": 2137177,
+      "n_cache_tokens": 2067171,
+      "n_output_tokens": 40156
+    },
+    {
+      "task": "cobol-modernization",
+      "trial": "cobol-modernization__H2vmMcC",
+      "started_at": "2026-07-03T22:03:51.418932Z",
+      "reward": 1.0,
+      "exception": null,
+      "n_input_tokens": 465630,
+      "n_cache_tokens": 439564,
+      "n_output_tokens": 13598
+    },
+    {
+      "task": "cobol-modernization",
+      "trial": "cobol-modernization__eUYuUCj",
+      "started_at": "2026-07-03T21:39:18.674127Z",
+      "reward": 1.0,
+      "exception": null,
+      "n_input_tokens": 194562,
+      "n_cache_tokens": 177489,
+      "n_output_tokens": 8316
+    },
+    {
+      "task": "cobol-modernization",
+      "trial": "cobol-modernization__f8g5ABe",
+      "started_at": "2026-07-03T21:17:33.115098Z",
+      "reward": 1.0,
+      "exception": null,
+      "n_input_tokens": 291381,
+      "n_cache_tokens": 268997,
+      "n_output_tokens": 10080
+    },
+    {
+      "task": "code-from-image",
+      "trial": "code-from-image__ZExdrea",
+      "started_at": "2026-07-03T21:40:37.536297Z",
+      "reward": 0.0,
+      "exception": "AgentTimeoutError",
+      "n_input_tokens": 14119627,
+      "n_cache_tokens": 14037285,
+      "n_output_tokens": 35220
+    },
+    {
+      "task": "code-from-image",
+      "trial": "code-from-image__y5ByPLy",
+      "started_at": "2026-07-03T22:04:35.219854Z",
+      "reward": 0.0,
+      "exception": "AgentTimeoutError",
+      "n_input_tokens": 2356570,
+      "n_cache_tokens": 2284571,
+      "n_output_tokens": 29990
+    },
+    {
+      "task": "code-from-image",
+      "trial": "code-from-image__yT3Fteo",
+      "started_at": "2026-07-03T21:17:33.117978Z",
+      "reward": 0.0,
+      "exception": "AgentTimeoutError",
+      "n_input_tokens": 17729914,
+      "n_cache_tokens": 17634007,
+      "n_output_tokens": 35988
+    },
+    {
+      "task": "compile-compcert",
+      "trial": "compile-compcert__XBMrzXV",
+      "started_at": "2026-07-03T21:20:52.361403Z",
+      "reward": 1.0,
+      "exception": null,
+      "n_input_tokens": 1113039,
+      "n_cache_tokens": 1070661,
+      "n_output_tokens": 10388
+    },
+    {
+      "task": "compile-compcert",
+      "trial": "compile-compcert__YCmtxjE",
+      "started_at": "2026-07-03T22:05:18.193342Z",
+      "reward": 1.0,
+      "exception": null,
+      "n_input_tokens": 803261,
+      "n_cache_tokens": 765787,
+      "n_output_tokens": 8100
+    },
+    {
+      "task": "compile-compcert",
+      "trial": "compile-compcert__qn6dcgH",
+      "started_at": "2026-07-03T21:42:27.579330Z",
+      "reward": 1.0,
+      "exception": null,
+      "n_input_tokens": 781669,
+      "n_cache_tokens": 749010,
+      "n_output_tokens": 8071
+    },
+    {
+      "task": "configure-git-webserver",
+      "trial": "configure-git-webserver__T679RUW",
+      "started_at": "2026-07-03T21:44:57.938106Z",
+      "reward": 1.0,
+      "exception": null,
+      "n_input_tokens": 76211,
+      "n_cache_tokens": 63371,
+      "n_output_tokens": 3735
+    },
+    {
+      "task": "configure-git-webserver",
+      "trial": "configure-git-webserver__xU4qYms",
+      "started_at": "2026-07-03T22:08:46.181046Z",
+      "reward": 1.0,
+      "exception": null,
+      "n_input_tokens": 42591,
+      "n_cache_tokens": 31908,
+      "n_output_tokens": 2756
+    },
+    {
+      "task": "configure-git-webserver",
+      "trial": "configure-git-webserver__yEaZbHX",
+      "started_at": "2026-07-03T21:21:16.027751Z",
+      "reward": 1.0,
+      "exception": null,
+      "n_input_tokens": 42566,
+      "n_cache_tokens": 31803,
+      "n_output_tokens": 2647
+    },
+    {
+      "task": "constraints-scheduling",
+      "trial": "constraints-scheduling__kUUyL8j",
+      "started_at": "2026-07-03T22:10:32.235473Z",
+      "reward": 1.0,
+      "exception": null,
+      "n_input_tokens": 33606,
+      "n_cache_tokens": 23629,
+      "n_output_tokens": 4024
+    },
+    {
+      "task": "constraints-scheduling",
+      "trial": "constraints-scheduling__pe2zruE",
+      "started_at": "2026-07-03T21:47:11.572426Z",
+      "reward": 1.0,
+      "exception": null,
+      "n_input_tokens": 70136,
+      "n_cache_tokens": 56435,
+      "n_output_tokens": 6038
+    },
+    {
+      "task": "constraints-scheduling",
+      "trial": "constraints-scheduling__z5EnxP6",
+      "started_at": "2026-07-03T21:23:23.835047Z",
+      "reward": 1.0,
+      "exception": null,
+      "n_input_tokens": 64187,
+      "n_cache_tokens": 54651,
+      "n_output_tokens": 4169
+    },
+    {
+      "task": "count-dataset-tokens",
+      "trial": "count-dataset-tokens__8DUm5ig",
+      "started_at": "2026-07-03T22:12:07.619099Z",
+      "reward": 0.0,
+      "exception": null,
+      "n_input_tokens": 1357781,
+      "n_cache_tokens": 1303386,
+      "n_output_tokens": 15048
+    },
+    {
+      "task": "count-dataset-tokens",
+      "trial": "count-dataset-tokens__n9jeJKF",
+      "started_at": "2026-07-03T21:49:14.964541Z",
+      "reward": 0.0,
+      "exception": "AgentTimeoutError",
+      "n_input_tokens": 5038823,
+      "n_cache_tokens": 4982243,
+      "n_output_tokens": 23037
+    },
+    {
+      "task": "count-dataset-tokens",
+      "trial": "count-dataset-tokens__vPTTqTQ",
+      "started_at": "2026-07-03T21:25:14.157535Z",
+      "reward": 0.0,
+      "exception": "AgentTimeoutError",
+      "n_input_tokens": 2700828,
+      "n_cache_tokens": 2653145,
+      "n_output_tokens": 19835
+    }
+  ]
+}

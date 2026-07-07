@@ -1,0 +1,41 @@
+{
+  "description": "Tasks that provably cannot be attempted behind this sandbox's egress allowlist. Every pass 2 report computes its clean-subset numbers on the 89 minus these 7 = 82 remaining tasks, by construction from this file.",
+  "defined_in_pass": 1,
+  "excluded": [
+    {
+      "task": "hf-model-inference",
+      "reason": "huggingface.co blocked (host_not_allowed)",
+      "evidence": "pass 1 retry: 3 of 4 verifier tests pass, only test_model_downloaded fails after denied huggingface_hub requests; results/README.md, env-startup retry table"
+    },
+    {
+      "task": "mteb-retrieve",
+      "reason": "huggingface.co blocked (host_not_allowed)",
+      "evidence": "pass 1 retry: 17 denied huggingface requests in agent transcript; results/README.md"
+    },
+    {
+      "task": "mteb-leaderboard",
+      "reason": "huggingface.co blocked (host_not_allowed)",
+      "evidence": "pass 1 retry: 4 denied huggingface requests in agent transcript; results/README.md"
+    },
+    {
+      "task": "count-dataset-tokens",
+      "reason": "huggingface.co blocked (host_not_allowed)",
+      "evidence": "pass 1: denied huggingface requests in agent transcript; results/README.md, blocked-egress table"
+    },
+    {
+      "task": "reshard-c4-data",
+      "reason": "verifier itself needs allenai/c4 from huggingface.co",
+      "evidence": "pass 1: verifier errors in 4.7s on dataset download; results/README.md, blocked-egress table"
+    },
+    {
+      "task": "build-pmars",
+      "reason": "verifier asserts Debian source packages were used; apt mirrors blocked",
+      "evidence": "pass 1: test_debian_source_used / test_built_from_source fail; apt-get source impossible (deb.debian.org 403 host_not_allowed); results/README.md"
+    },
+    {
+      "task": "make-doom-for-mips",
+      "reason": "gcc-12 MIPS cross-toolchain debs blocked (apt mirrors)",
+      "evidence": "pass 1: 8 denied fetches of debian pool packages in agent transcript; results/README.md"
+    }
+  ]
+}

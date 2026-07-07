@@ -1,0 +1,139 @@
+{
+  "configs": {
+    "A": {
+      "full_basis": {
+        "n_tasks": 86,
+        "n_runs": 3,
+        "solid": 0.2093,
+        "worst_of": 0.2907,
+        "average": 0.3217,
+        "best_of": 0.3605,
+        "ceiling": 0.4419,
+        "per_run_pass_rates": [
+          0.314,
+          0.2907,
+          0.3605
+        ]
+      },
+      "clean_basis": {
+        "n_tasks": 82,
+        "n_runs": 3,
+        "solid": 0.2195,
+        "worst_of": 0.3049,
+        "average": 0.3374,
+        "best_of": 0.378,
+        "ceiling": 0.4634,
+        "per_run_pass_rates": [
+          0.3293,
+          0.3049,
+          0.378
+        ]
+      },
+      "tokens_in": 68570924,
+      "tokens_out": 2626359,
+      "tokens_cache_read": 23825238,
+      "cache_hit_rate": 0.3475,
+      "cost_usd": 182.74,
+      "cost_is_lower_bound": false,
+      "n_trials": 259,
+      "n_solved_trials": 84,
+      "tokens_per_solve": 816321,
+      "problems": []
+    },
+    "B": {
+      "full_basis": {
+        "n_tasks": 24,
+        "n_runs": 3,
+        "solid": 0.25,
+        "worst_of": 0.25,
+        "average": 0.3472,
+        "best_of": 0.4167,
+        "ceiling": 0.5,
+        "per_run_pass_rates": [
+          0.375,
+          0.4167,
+          0.25
+        ]
+      },
+      "clean_basis": {
+        "n_tasks": 22,
+        "n_runs": 3,
+        "solid": 0.2727,
+        "worst_of": 0.2727,
+        "average": 0.3788,
+        "best_of": 0.4545,
+        "ceiling": 0.5455,
+        "per_run_pass_rates": [
+          0.4091,
+          0.4545,
+          0.2727
+        ]
+      },
+      "tokens_in": 652047050,
+      "tokens_out": 1403944,
+      "tokens_cache_read": 648882273,
+      "cache_hit_rate": 0.9951,
+      "cost_usd": 225.22,
+      "cost_is_lower_bound": true,
+      "n_trials": 72,
+      "n_solved_trials": 25,
+      "tokens_per_solve": 26081882,
+      "problems": []
+    },
+    "C": {
+      "full_basis": {
+        "n_tasks": 86,
+        "n_runs": 3,
+        "solid": 0.1628,
+        "worst_of": 0.2558,
+        "average": 0.2713,
+        "best_of": 0.2907,
+        "ceiling": 0.3837,
+        "per_run_pass_rates": [
+          0.2907,
+          0.2674,
+          0.2558
+        ]
+      },
+      "clean_basis": {
+        "n_tasks": 82,
+        "n_runs": 3,
+        "solid": 0.1707,
+        "worst_of": 0.2683,
+        "average": 0.2846,
+        "best_of": 0.3049,
+        "ceiling": 0.4024,
+        "per_run_pass_rates": [
+          0.3049,
+          0.2805,
+          0.2683
+        ]
+      },
+      "tokens_in": 36664129,
+      "tokens_out": 2730966,
+      "tokens_cache_read": 405248,
+      "cache_hit_rate": 0.0111,
+      "cost_usd": 149.87,
+      "cost_is_lower_bound": false,
+      "n_trials": 258,
+      "n_solved_trials": 70,
+      "tokens_per_solve": 523773,
+      "problems": [
+        "caffe-cifar-10__3vnVaNr: no reward (VerifierTimeoutError); counted as failure",
+        "caffe-cifar-10__B7tqi4J: no reward (VerifierTimeoutError); counted as failure",
+        "filter-js-from-html__XNFrMyZ: no reward (VerifierTimeoutError); counted as failure",
+        "mailman__7QCgpzA: no reward (VerifierTimeoutError); counted as failure",
+        "model-extraction-relu-logits__74HyXTN: no reward (VerifierTimeoutError); counted as failure"
+      ]
+    }
+  },
+  "excluded_tasks": [
+    "build-pmars",
+    "count-dataset-tokens",
+    "hf-model-inference",
+    "make-doom-for-mips",
+    "mteb-leaderboard",
+    "mteb-retrieve",
+    "reshard-c4-data"
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "solid": 0.4091,
+  "worst_of": 0.4091,
+  "average": 0.4091,
+  "best_of": 0.4091,
+  "ceiling": 0.4091,
+  "spread": 0.0,
+  "n_tasks": 44,
+  "n_runs": 1,
+  "per_run_pass_rates": [
+    0.4091
+  ],
+  "incomplete_trials": [
+    "custom-memory-heap-crash__nJxeooj: no verifier reward (RuntimeError); counted as failure",
+    "filter-js-from-html__Fso4T7d: no verifier reward (VerifierTimeoutError); counted as failure",
+    "hf-model-inference__HcFidMT: no verifier reward (RuntimeError); counted as failure"
+  ]
+}
