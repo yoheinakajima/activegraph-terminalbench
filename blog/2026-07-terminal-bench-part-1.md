@@ -6,7 +6,7 @@
 
 ## Where this started
 
-At AI Engineer World's Fair I met [Wolfram Ravenwolf](https://huggingface.co/wolfram) <!-- TODO: confirm preferred WolfBench link -->, who benchmarks agents with five metrics per config instead of one average, on the thesis that agent performance is a distribution and a single number hides the shape. I wanted to test two things at once: whether [ActiveGraph](https://activegraph.ai) <!-- TODO: link the two ActiveGraph papers --> can back a real terminal agent, and whether the five-metric lens changes what you learn. So I pointed both at [Terminal-Bench 2.0](https://www.tbench.ai), 89 tasks that make an agent compile CompCert, recover truncated SQLite databases, and modernize COBOL.
+At AI Engineer World's Fair I met Wolfram Ravenwolf, whose [WolfBench](https://wolfbench.ai) reports five metrics per agent instead of one average, on the thesis that agent performance is a distribution and a single number hides the shape. I wanted to test two things at once: whether [ActiveGraph](https://activegraph.ai) can back a real terminal agent, and whether the five-metric lens changes what you learn. So I pointed both at [Terminal-Bench 2.0](https://www.tbench.ai), 89 tasks that make an agent compile CompCert, recover truncated SQLite databases, and modernize COBOL.
 
 ## What I built
 
@@ -28,7 +28,7 @@ Then pass 2 ran the same tasks at k=3 and showed me what that single number was 
 
 Pass 2 ran three configs at k=3 on Sonnet 4.5. A is the pass-1 agent plus prompt caching: full transcript resent every turn, cache reads at $0.30 per million tokens. B is [terminus-2](https://www.tbench.ai), the same-model control, to anchor against its published 42.8 ± 2.8 average. C is the treatment: graph-retrieval context, a small slice queried from the typed graph instead of the transcript.
 
-Five metrics per config, on the clean 82-task subset (B ran a 24-task checkpoint subset only, 22 after exclusions; its numbers live on that basis):
+Five metrics per config at k=3, on the clean 82-task subset (B ran a 24-task checkpoint subset only, 22 after exclusions; its numbers live on that basis):
 
 | config | tasks | solid | worst run | average | best run | ceiling | cost |
 |---|---|---|---|---|---|---|---|
@@ -38,6 +38,8 @@ Five metrics per config, on the clean 82-task subset (B ran a 24-task checkpoint
 
 <!-- source: reports/pass2_metrics.json (clean_basis per config); B cost is a lower bound because LiteLLM does not surface cache-write counts -->
 
+![Grouped bars: the five metrics for configs A, B, and C. A leads C on every metric; B leads on its 22-task subset.](assets/pass2-five-metrics.png)
+
 The real pass-2 bill, since anyone repeating this deserves the whole number: $557.83 across the three configs as tabled, plus an estimated $30 to $40 of aborted chunks and rework from container resets and one disk-exhaustion crash, plus about $8 for the instrumented reproduction below. Call it $600, on top of pass 1's $112.
 
 On the 22 tasks all three configs ran, A averages 40.9% and B 37.9%, parity within noise at n=22. The harness holds its own against the reference agent on the same model and infrastructure. Every comparison to B's published 42.8 carries mismatches I'll get to in the confounds section.
@@ -46,13 +48,13 @@ On the 22 tasks all three configs ran, A averages 40.9% and B 37.9%, parity with
 
 C lost to A by 5.1 points average and 4.9 points solid on the identical 82-task basis. I expected the opposite. The graph retrieval was the design the event store was built for.
 
-The headline signal is bimodal, and it's more interesting than the score gap. C hit a budget cap (60 steps or 840 seconds) in 31% of its 258 trials; A hit one in 14%. But when C solves a task, it solves it in fewer steps than A: mean 18.5 versus 28.7 on solved trials. Retrieval either finds the path quickly on its small context or it spirals until a budget kills it. It almost never grinds out a slow win: A solved 5 trials after hitting a cap, C solved 2.
+The headline signal is bimodal, and it's more interesting than the score gap. C hit a budget cap (60 steps or 840 seconds) in 31% of its 258 trials (k=3 across all 86 attempted tasks, before the clean-subset cut); A hit one in 14%. But when C solves a task, it solves it in fewer steps than A: mean 18.5 versus 28.7 on solved trials. Retrieval either finds the path quickly on its small context or it spirals until a budget kills it. It almost never grinds out a slow win: A solved 5 trials after hitting a cap, C solved 2.
 
 <!-- source: results/pass2/pass2-{A,C}-*.json, finish_reason and steps fields; analysis in reports/pass2.md -->
 
 The 5-point regression concentrates in a handful of tasks that A solves reliably and C zeroed. To find out why, I re-ran the sharpest one with full event capture. What follows is from that instrumented reproduction, so it's a fresh spiral of the same shape, and the original failures are argued by inference from their summary statistics.
 
-**The walkthrough.** Task: `cobol-modernization` (port a COBOL transaction processor to Python). The repro reproduced the spiral in 3 of 3 trials: every one ran to the 60-step cap, where A's original trials finished clean in 38 to 46 steps. Here's the failed trial, turn by turn.
+**The walkthrough.** Task: `cobol-modernization` (port a COBOL transaction processor to Python). The repro reproduced the spiral in 3 of 3 trials: every one ran to the 60-step cap, where A's original trials finished clean in 38 to 46 steps. Here's one of them, turn by turn.
 
 At step 22 the agent writes `/app/program.py`, guessing 40-byte account records. At step 24 it runs the file and gets a traceback in `parse_account`, line 90. Small bug, one-line fix if you can see both the file and the error.
 
@@ -64,7 +66,7 @@ A's config at step 31 would have held a 20-exchange verbatim tail: the full prog
 
 <!-- source: results/events/repro-C-cobol-events.tar.gz, trial cobol-modernization__WDE8rhX, context_built step 31 and command_executed events; walkthrough also in reports/pass2.md -->
 
-One honest complication: the reproduction also weakened part of my original story. `portfolio-optimization`, another task that zeroed under C, refused to reproduce: 3 of 3 clean solves in 12 to 14 steps. Its original zeros look like run-level variance. The durable finding is the config-wide cap-rate gap and the rewrite spiral, and the per-task flip list should be read with variance in mind.
+One complication the reproduction added: it weakened part of my original story. `portfolio-optimization`, another task that zeroed under C, refused to reproduce: 3 of 3 clean solves in 12 to 14 steps. Its original zeros look like run-level variance. The durable finding is the config-wide cap-rate gap and the rewrite spiral, and the per-task flip list should be read with variance in mind.
 
 <!-- source: results/events/repro-C-portfolio-events.tar.gz -->
 
@@ -86,7 +88,7 @@ Cache pricing erased the advantage. A's big context is stable across turns, so i
 
 If your baseline caches well, optimizing tokens per turn is optimizing the wrong number. The objective function of context engineering shifted under this design between the papers that inspired it and the run that tested it, and the shift has a price tag on it.
 
-Two supporting exhibits. First, caching only pays if your prefix is stable, and my own v1 had a bug there: once the transcript window started sliding, the omission counter in the first message changed every turn, so every turn paid a 1.25x cache write for a prefix nothing would ever read again, about 11k wasted write-tokens per turn. Per-turn cache logging exposed it; the fix drops the breakpoint once trimming starts. Second, harness architecture drives cost tails harder than model choice: two 12,000-second `build-pov-ray` trials in the terminus control consumed 300M and 236M input tokens in a summarization loop. That single chunk of the control cost $181.79, with 99.8% of its input tokens cached. Cached tokens are cheap; 564 million of them still add up.
+Two supporting exhibits. First, caching only pays if your prefix is stable, and my own v1 had a bug there: once the transcript window started sliding, the omission counter in the first message changed every turn, so every turn paid a 1.25x cache write for a prefix nothing would ever read again, about 11k wasted write-tokens per turn. Per-turn cache logging exposed it; the fix drops the breakpoint once trimming starts. Second, harness architecture drives cost tails harder than model choice: two 12,000-second `build-pov-ray` trials in the terminus control consumed 300M and 236M input tokens in a summarization loop. That single chunk of the control cost $181.79, with 99.8% of its input tokens cached. Cached tokens are cheap; 564 million of them still add up. There's independent evidence the burn bought nothing: in [Wolfram's WolfBench timeout analysis](https://wolfbench.ai) across roughly 10,000 task results, build-pov-ray never needed more than 34 minutes to succeed despite its 200-minute default.
 
 <!-- source: src/activegraph_harness/context.py (measured note in v1 docstring); results/pass2/pass2-B-s01.json -->
 
@@ -104,10 +106,10 @@ The cobol walkthrough points at the fix directly. Retrieval failed when the agen
 
 So v3 is a hybrid with a tripwire. Default to the cached verbatim tail (it won). Layer graph retrieval on top for what the tail can't hold: files touched, error chains, cross-step structure. And add graph-native stall detection: a projection that watches for repeated similar commands against the same error object and, when it fires, swaps the next turn's context to the full verbatim window. The graph stops being the context and starts being the instrument that decides what the context should be.
 
-Pass 3 moves to a native x86 VM with open egress, which recovers all seven excluded tasks and deletes the TLS-workaround stack; uniform 3,600-second timeouts for every config; k=5; the terminus control on all 89 tasks; and v3 as the treatment. Part 2 will report whether the tripwire earns its keep.
+Pass 3 moves to a native x86 VM with open egress, which recovers all seven excluded tasks and deletes the TLS-workaround stack; uniform 3,600-second timeouts for every config; k=5; the terminus control on all 89 tasks; and v3 as the treatment. The 3,600 seconds isn't a number I picked: it matches the uniform 1-hour timeout WolfBench locked after that same ~10,000-result analysis. Part 2 will report whether the tripwire earns its keep.
 
 ## Links and thanks
 
-Code and all artifacts: [activegraph-terminalbench](https://github.com/yoheinakajima/activegraph-terminalbench). Every number in this post traces to a committed file; the HTML comments in this post's source name them. Background: the two ActiveGraph papers <!-- TODO: links -->, [WolfBench](https://huggingface.co/wolfram) <!-- TODO: confirm link -->, and [Terminal-Bench](https://www.tbench.ai).
+Code and all artifacts: [activegraph-terminalbench](https://github.com/yoheinakajima/activegraph-terminalbench). Every number in this post traces to a committed file; the HTML comments in this post's source name them. Background: the two ActiveGraph papers ([arXiv:2605.21997](https://arxiv.org/abs/2605.21997), [arXiv:2606.10241](https://arxiv.org/abs/2606.10241)), [WolfBench](https://wolfbench.ai) (engine open-sourced at [wandb/WolfBench](https://github.com/wandb/WolfBench)), and [Terminal-Bench](https://www.tbench.ai).
 
 Thanks to Wolfram Ravenwolf for the five-metric framework and the conversation that started this.
